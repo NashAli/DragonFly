@@ -27,75 +27,18 @@ Imports Windows.UI.Core
 Imports Windows.ApplicationModel.AppService
 Imports System.Collections.ObjectModel
 Imports Windows.Devices.Bluetooth.Rfcomm
+Imports Windows.Phone
+Imports System.IO
+Imports System.Collections.Generic
+Imports System
+Imports Windows.UI.Xaml.Controls
 ''' <summary>
 ''' An empty page that can be used on its own or navigated to within a Frame.
 ''' </summary>
 Public NotInheritable Class MainPage
     Inherits Page
 
-    '   Gyro
-    Private Const CONFIG As Byte = &H1A    '   bit 3 & 4 select the full range scale
-    Private Const GYRO_CONFIG As Byte = &H1B    '   bit 3 & 4 select the full range scale
-    Private Const ACCEL_CONFIG As Byte = &H1C    '   bit 3 & 4 select the full range scale
-    Public Const ADDRESS As Byte = &H68
-    Private Const SMPLRT_DIV As Byte = &H19
-    Private Const FIFO_EN As Byte = &H23
-    Private Const INT_ENABLE As Byte = &H38
-    Private Const INT_STATUS As Byte = &H3A
-    Private Const USER_CTRL As Byte = &H6A
-    Private Const FIFO_COUNT As Byte = &H72
-    Private Const FIFO_R_W As Byte = &H74
-    Private Const WHO_AM_I As Byte = &H74
-    Private Const PWR_MGMT_1 As Byte = &H6B '   default &H40 (sleep)
-    Private Const PWR_MGMT_2 As Byte = &H6C
-    Private Const SIG_PATH_RESET As Byte = &H68 '   bit0 - temp, bit1 - accel, bit2 - gyro
 
-    Private Const GYRO_XOUT_H As Byte = &H43
-    Private Const GYRO_XOUT_L As Byte = &H44
-    Private Const GYRO_YOUT_H As Byte = &H45
-    Private Const GYRO_YOUT_L As Byte = &H46
-    Private Const GYRO_ZOUT_H As Byte = &H47
-    Private Const GYRO_ZOUT_L As Byte = &H48
-
-    Private Const ACCEL_XOUT_H As Byte = &H3B
-    Private Const ACCEL_XOUT_L As Byte = &H3C
-    Private Const ACCEL_YOUT_H As Byte = &H3D
-    Private Const ACCEL_YOUT_L As Byte = &H3E
-    Private Const ACCEL_ZOUT_H As Byte = &H3F
-    Private Const ACCEL_ZOUT_L As Byte = &H40
-
-    Private Const TEMP_OUT_H As Byte = &H41
-    Private Const TEMP_OUT_L As Byte = &H42
-
-    '   NRF
-
-    Private Const NRF24_CE_PIN As Integer = 22           '   GPIO22
-    Private Const NRF24_CONFIG As Byte = &H0             '   NORDIC SEMI NRF24L01 REGISTERS
-    Private Const NRF24_ENA_AA As Byte = &H1
-    Private Const NRF24_EN_RXADDR As Byte = &H2
-    Private Const NRF24_SETUP_AW As Byte = &H3
-    Private Const NRF24_SETUP_RETR As Byte = &H4
-    Private Const NRF24_RF_CH As Byte = &H5
-    Private Const NRF24_RF_SETUP As Byte = &H6
-    Private Const NRF24_STATUS As Byte = &H7
-    Private Const NRF24_OBSERVE_TX As Byte = &H8
-    Private Const NRF24_CD As Byte = &H9
-    Private Const NRF24_TX_ADDR As Byte = &H10
-    Private Const NRF24_RX_ADD_P0 As Byte = &HA
-    Private Const NRF24_RX_ADD_P1 As Byte = &HB
-    Private Const NRF24_RX_ADD_P2 As Byte = &HC
-    Private Const NRF24_RX_ADD_P3 As Byte = &HD
-    Private Const NRF24_RX_ADD_P4 As Byte = &HE
-    Private Const NRF24_RX_ADD_P5 As Byte = &HF
-
-    Private Const NRF24_FIFO_STATUS As Byte = &H17
-
-    Private Const NRF24_RD_RX_PAYLOAD As Byte = &H61    'commands
-    Private Const NRF24_WR_TX_PAYLOAD As Byte = &HA0
-    Private Const NRF24_FLUSH_TX As Byte = &HE1
-    Private Const NRF24_FLUSH_RX As Byte = &HE2
-    Private Const SPI_CHIP_SELECT_LINE As Integer = 0    ' Line 0 maps To physical pin number 24 On the RPi2 Or RPi3 CE0 - GPIO8
-    Private Const SPI_CONTROLLER_NAME As String = "SPI0"
     '   Gyro stuff
 
     Partial Public Class MPU6050
@@ -105,7 +48,6 @@ Public NotInheritable Class MainPage
             Throw New NotImplementedException()
         End Sub
     End Class
-
 
     Public Class MpuSensorValue
         Public Property AccelerationX() As Single
@@ -195,11 +137,78 @@ Public NotInheritable Class MainPage
     End Class
 
 
+    Private Const CONFIG As Byte = &H1A    '   bit 3 & 4 select the full range scale
+    Private Const GYRO_CONFIG As Byte = &H1B    '   bit 3 & 4 select the full range scale
+    Private Const ACCEL_CONFIG As Byte = &H1C    '   bit 3 & 4 select the full range scale
+    Public Const ADDRESS As Byte = &H68
+    Private Const SMPLRT_DIV As Byte = &H19
+    Private Const FIFO_EN As Byte = &H23
+    Private Const INT_ENABLE As Byte = &H38
+    Private Const INT_STATUS As Byte = &H3A
+    Private Const USER_CTRL As Byte = &H6A
+    Private Const FIFO_COUNT As Byte = &H72
+    Private Const FIFO_R_W As Byte = &H74
+    Private Const WHO_AM_I As Byte = &H74
+    Private Const PWR_MGMT_1 As Byte = &H6B '   default &H40 (sleep)
+    Private Const PWR_MGMT_2 As Byte = &H6C
+    Private Const SIG_PATH_RESET As Byte = &H68 '   bit0 - temp, bit1 - accel, bit2 - gyro
+
+    Private Const GYRO_XOUT_H As Byte = &H43
+    Private Const GYRO_XOUT_L As Byte = &H44
+    Private Const GYRO_YOUT_H As Byte = &H45
+    Private Const GYRO_YOUT_L As Byte = &H46
+    Private Const GYRO_ZOUT_H As Byte = &H47
+    Private Const GYRO_ZOUT_L As Byte = &H48
+
+    Private Const ACCEL_XOUT_H As Byte = &H3B
+    Private Const ACCEL_XOUT_L As Byte = &H3C
+    Private Const ACCEL_YOUT_H As Byte = &H3D
+    Private Const ACCEL_YOUT_L As Byte = &H3E
+    Private Const ACCEL_ZOUT_H As Byte = &H3F
+    Private Const ACCEL_ZOUT_L As Byte = &H40
+
+    Private Const TEMP_OUT_H As Byte = &H41
+    Private Const TEMP_OUT_L As Byte = &H42
+
+
+
+
+    '   NRF
+
+    Private Const NRF24_CE_PIN As Integer = 22           '   GPIO22
+    Private Const NRF24_CONFIG As Byte = &H0             '   NORDIC SEMI NRF24L01 REGISTERS
+    Private Const NRF24_ENA_AA As Byte = &H1
+    Private Const NRF24_EN_RXADDR As Byte = &H2
+    Private Const NRF24_SETUP_AW As Byte = &H3
+    Private Const NRF24_SETUP_RETR As Byte = &H4
+    Private Const NRF24_RF_CH As Byte = &H5
+    Private Const NRF24_RF_SETUP As Byte = &H6
+    Private Const NRF24_STATUS As Byte = &H7
+    Private Const NRF24_OBSERVE_TX As Byte = &H8
+    Private Const NRF24_CD As Byte = &H9
+    Private Const NRF24_TX_ADDR As Byte = &H10
+    Private Const NRF24_RX_ADD_P0 As Byte = &HA
+    Private Const NRF24_RX_ADD_P1 As Byte = &HB
+    Private Const NRF24_RX_ADD_P2 As Byte = &HC
+    Private Const NRF24_RX_ADD_P3 As Byte = &HD
+    Private Const NRF24_RX_ADD_P4 As Byte = &HE
+    Private Const NRF24_RX_ADD_P5 As Byte = &HF
+
+    Private Const NRF24_FIFO_STATUS As Byte = &H17
+
+    Private Const NRF24_RD_RX_PAYLOAD As Byte = &H61    'commands
+    Private Const NRF24_WR_TX_PAYLOAD As Byte = &HA0
+    Private Const NRF24_FLUSH_TX As Byte = &HE1
+    Private Const NRF24_FLUSH_RX As Byte = &HE2
+    Private Const SPI_CHIP_SELECT_LINE As Integer = 0    ' Line 0 maps To physical pin number 24 On the RPi2 Or RPi3 CE0 - GPIO8
+    Private Const SPI_CONTROLLER_NAME As String = "SPI0"
+
 
     '   Browser
+
     Public MyBookmarks(10, 10) As String
-    Private GoogleHome = "http://www.google.ca"
-    Private BingHome = "https://www.bing.com/#"
+    Private GoogleHome As String = "http://www.google.ca"
+    Private BingHome As String = "https://www.bing.com/#"
 
     '   Compass
 
@@ -230,6 +239,8 @@ Public NotInheritable Class MainPage
         IDLE_OPERATING_MODE = &H10
     End Enum
 
+
+
     '   IO setup
     Private Shared gpio As GpioController = Nothing         ' GPIO 
     Public Property I2cPortExpander As I2cDevice            ' PORT EXPANDER - &H20 - MCP23017
@@ -243,19 +254,24 @@ Public NotInheritable Class MainPage
 
     Private Const I2C_CONTROLLER_NAME As String = "I2C1"
 
-    '   Speech Recognition and Synthesis
-    Dim MyListener = New SpeechRecognizer
+
+
+
+
+    '   Speech Recognition and Synthesis and Audio
+    Dim MyListener As New SpeechRecognizer
     Dim MySpeaker As New SpeechSynthesizer
-    Dim MyStream As SpeechSynthesisStream
+    Dim MySpeechStream As SpeechSynthesisStream
+    Public MyBackgroundAudioStream As Stream
+    Private isPlaying As Boolean = False
+    Private isListening As Boolean = False
+    Private isTalking As Boolean = False
     Private voice As VoiceInformation
     Private Const SRGS_FILE As String = "Grammar/Main1grammar.xml"   ' Grammar File
     Private Const mcbeth As String = "SSML/McBeth.xml"
     Private Const Jabberwoky As String = "SSML/jabberwoky.xml"
 
-    Private isListening As Boolean = False
-    Private isTalking As Boolean = False
-    Private IntroText As String = "Dragonfly has restarted, please standby."
-
+    Private IntroText As String = "Dragonfly has restarted, standby."
 
     Private EvaUS As String = "Eva"     'us english female
     Private Zira As String = "Zira"     'us english female
@@ -330,8 +346,9 @@ Public NotInheritable Class MainPage
 
     '   Filer Stuff  Media Stuff...
     Dim currentFolder As StorageFolder
-    Dim Picker_SelectedFile As StorageFile
-    Private queryOptions As QueryOptions
+    Dim PickerSelectedFile As StorageFile
+    Dim SelectedSong As StorageFile
+    Public queryOptions As QueryOptions
 
     Private mediaFileExtensions As String() = {
         ".qcp", ".wav", ".mp3", ".m4r", ".m4a", ".aac", ".dat",
@@ -347,16 +364,24 @@ Public NotInheritable Class MainPage
     Private Automatic As Boolean = True
     Private AdminPassword As String = String.Empty
     Private CurrentPassword As String = String.Empty
-    Private NetPass As PasswordCredential = Nothing
+    Private UserNetPass As PasswordCredential = Nothing
     Public ReadOnly Property NetworkReport As WiFiNetworkReport
     Dim networks As IList(Of WiFiAvailableNetwork)
     Public ReadOnly Property Timestamp As DateTimeOffset
-    Public Event NetworkProfileChanged(sender As NetworkProfileChangedEventHandler)
-    Public Event OnLocationChanged(sender As StatusChangedEventArgs)
-    Public Event CharacterReceived(sender As CharacterReceivedEventArgs)
+    Public Event NetworkProfileChanged(ByVal sender As NetworkProfileChangedEventHandler)
+    Public Event OnLocationChanged(ByVal sender As OnLocationChangedEventHandler)
+    Public Event CharacterReceived(ByVal sender As CharacterReceivedEventArgs)
 
     '   USB
     Public ReadOnly Property USBDevicesReport As IList(Of UsbDeviceDescriptor)
+    Public Event OnDeviceAdded(sender As OnDeviceAddedEventHandler)
+    Public Event OnDeviceRemoved(ByVal sender As OnDeviceRemovedEventHandler)
+    Public Class ConnectedDevice
+        Public Property Id As String
+        Public Property Name As String
+    End Class
+
+
 
     '   All Radios
 
@@ -364,17 +389,19 @@ Public NotInheritable Class MainPage
 
 
 
-    '   Create system defaults
+    '   Create a few system defaults
     Public Property XMax As Integer = 800
     Public Property YMax As Integer = 480
     Public Property MyRotation As Integer = 0
-    Public Property MyXPos
-    Public Property MyYPos
-    Public Property MyZPos
+    Public Property MyXPos As Integer
+    Public Property MyYPos As Integer
+    Public Property MyZPos As Integer
+
+
 
     '   System stuff
     Private systemPresenter As SystemProperties
-    Public MyAlarmPoints(10, 10, 10, 10)
+    Public MyAlarmPoints As TimeSpan()
 
     Public Class MYSYSTEMDEVICES
         Property GYRO As Boolean
@@ -385,8 +412,10 @@ Public NotInheritable Class MainPage
         Property MOTION As Boolean
     End Class
     Public Class MYRADIO
-        Property Power
-        Property Payload
+        Property Power As Integer
+        Property Channel As Integer
+        Property Pipe As Integer
+        Property Payload As SByte
     End Class
 
     '   Initialize all parms
@@ -413,7 +442,11 @@ Public NotInheritable Class MainPage
         InitDragonfly()
         ShowDragonfly()
         StartDragonfly()
+        WatchDevices()
+
     End Sub
+
+
     '   init dragonfly
     Private Sub InitDragonfly()
 
@@ -422,8 +455,8 @@ Public NotInheritable Class MainPage
         RestoreMainGrids()
         LoadBookmarks()
         MyBrowser.Navigate(New Uri(GoogleHome))
-        MediaElement.Volume = 0.2
-        MainVolumeSlider.Value = 0.2
+        MediaElement.Volume = 0.15
+        MainVolumeSlider.Value = 0.15
         Talker(David, IntroText)
         VoiceSelector.Items.Clear()
         Dim list = From a In SpeechSynthesizer.AllVoices
@@ -442,9 +475,43 @@ Public NotInheritable Class MainPage
     Private Sub StartDragonfly()
         'more stuff
     End Sub
-    '   USB Stuff
+
+
+    '   ALL USB Stuff
+
+
+
+
+    Public Sub WatchDevices()
+
+
+    End Sub
+
+    Private Sub DevicesEnumCompleted(ByVal sender As DeviceWatcher, ByVal args As DeviceWatcherEvent)
+
+        ShowStatus("USB Devices Enumeration Completed")
+    End Sub
+    Private Sub DevicesAdded(ByVal sender As DeviceWatcher, ByVal args As DeviceInformation)
+        ShowStatus("USB Devices Added: " & args.Id)
+        Dim device = New ConnectedDevice() With {.Id = args.Id, .Name = args.Name}
+
+        If Not UsbConnectedDevicesList.Items.Contains(device.Name) Then
+            UsbConnectedDevicesList.Items.Add(device.Name)
+        End If
+
+
+    End Sub
+
+
     Private Sub ScanUSB()
-        Throw New NotImplementedException()
+        UsbConnectedDevicesList.Items.Clear()
+        UsbConnectedDevicesList.Items.Add("nothing is plugged in")
+        Try
+
+        Catch ex As Exception
+
+        End Try
+
     End Sub
 
 
@@ -616,7 +683,7 @@ Public NotInheritable Class MainPage
 
 
 
-    '   power button brings up the power options menu
+    '   power management button brings up the power options menu
     Private Sub PowerBtn_Click(sender As Object, e As RoutedEventArgs) Handles PowerBtn.Click
         Select Case PowerOptionsGrid.Visibility
             Case Visibility.Collapsed
@@ -628,6 +695,7 @@ Public NotInheritable Class MainPage
     End Sub
 
     Private Sub ShutDownBtn_Click(sender As Object, e As RoutedEventArgs) Handles ShutDownBtn.Click
+        Talker(Zira, "Shutting down")
         ShutDown()
     End Sub
 
@@ -636,6 +704,7 @@ Public NotInheritable Class MainPage
     End Sub
 
     Private Sub ReBootBtn_Click(sender As Object, e As RoutedEventArgs) Handles ReBootBtn.Click
+        Talker(Zira, "rebooting")
         ReBoot()
     End Sub
 
@@ -669,7 +738,18 @@ Public NotInheritable Class MainPage
                 SystemInfoGrid.Visibility = Visibility.Collapsed
         End Select
     End Sub
-
+    '   tools 1 menu toggle
+    Private Sub ToolsDisplayBtn_Click(sender As Object, e As RoutedEventArgs) Handles ToolsDisplayBtn.Click
+        Select Case ToolsMenuGrid.Visibility
+            Case Visibility.Collapsed
+                HideAllGrids()
+                ToolsMenuGrid.Visibility = Visibility.Visible
+                Exit Select
+            Case Visibility.Visible
+                ToolsMenuGrid.Visibility = Visibility.Collapsed
+                RestoreMainGrids()
+        End Select
+    End Sub
 
     '   Show SYSTEM info
     Private Sub ShowSystemInfo()
@@ -690,20 +770,22 @@ Public NotInheritable Class MainPage
         Dim eas As New EasClientDeviceInformation()
         DeviceManufacturerTxt.Text = "Mfgr: " + eas.SystemManufacturer
         DeviceModelTxt.Text = eas.SystemProductName
+
         ' get CPU type
         Dim curpack As Package = Package.Current
         SystemArchitectureTxt.Text = "CPU - " + curpack.Id.Architecture.ToString()
 
+        '   about me
+        ApplicationNameTxt.Text = curpack.DisplayName
+        Dim pv As PackageVersion = curpack.Id.Version
+        PackageVersionTxt.Text = "Ver. " + pv.Major.ToString + "." + pv.Minor.ToString + "." + pv.Build.ToString + " Revision :" + pv.Revision.ToString
     End Sub
 
     '   show network stuff
     Private Sub ShowNetworkStatus()
-        Dim curpack As Package = Package.Current
-        ApplicationNameTxt.Text = curpack.DisplayName
-        Dim pv As PackageVersion = curpack.Id.Version
-        PackageVersionTxt.Text = "Ver." + pv.Major.ToString + "." + pv.Minor.ToString + "." + pv.Build.ToString + " Revision :" + pv.Revision.ToString
 
         HostNameTxt.Text = "Hostname: " + Dns.GetHostName
+
         For Each localHostName As HostName In NetworkInformation.GetHostNames()
 
             If localHostName.IPInformation IsNot Nothing Then
@@ -750,19 +832,20 @@ Public NotInheritable Class MainPage
 
     End Sub
 
-
     '   Show status....
     Private Sub ShowStatus(stat As String)
         StatusGrid.Visibility = Visibility.Visible
         GeneralStatusTxt.Text = stat
     End Sub
-    '   GRIDS STUFF
+
+    '   GRIDS STUFF - RESTORE MAIN GRIDS
     Private Sub RestoreMainGrids()
         HideAllGrids()
         ClockGrid.Visibility = Visibility.Collapsed
         DateGrid.Visibility = Visibility.Collapsed
         PowerBtn.Visibility = Visibility.Visible
     End Sub
+
     '   HIDE ALL GRIDS...
     Private Sub HideAllGrids()
         PictureGrid.Visibility = Visibility.Collapsed
@@ -791,6 +874,7 @@ Public NotInheritable Class MainPage
         ConfigureGrid.Visibility = Visibility.Collapsed
         GuestMgmtGrid.Visibility = Visibility.Collapsed
     End Sub
+
     '   SPIN MY DRAGONFLY
     Private Sub UpdateDragonfly()
         Try
@@ -805,10 +889,10 @@ Public NotInheritable Class MainPage
 
     '   show memory
     Private Sub GetMemory()
-        Dim tempusage As Integer = (MemoryManager.AppMemoryUsage / MemoryManager.AppMemoryUsageLimit) * 100
-        MemoryUsageInd.Value = tempusage
-        MemoryUsageTxt.Text = "Usage Level: " + MemoryManager.AppMemoryUsageLevel.ToString + " - " + tempusage.ToString + " % used."
-        Dim used As Integer = MemoryManager.AppMemoryUsage.ToString / 1048576
+        Dim memusage As Integer = CInt((MemoryManager.AppMemoryUsage / MemoryManager.AppMemoryUsageLimit) * 100)
+        MemoryUsageInd.Value = memusage
+        MemoryUsageTxt.Text = "Usage Level: " + MemoryManager.AppMemoryUsageLevel.ToString + " - " + memusage.ToString + " % used."
+        Dim used As Integer = CInt(MemoryManager.AppMemoryUsage.ToString) / 1048576
         MemoryUsedTxt.Text = used.ToString + " MBytes"
     End Sub
     '   network status changed
@@ -903,17 +987,16 @@ Public NotInheritable Class MainPage
         CheckForWifiAdapters()
     End Sub
 
-
-
+    '   ******************************************************************************
+    '   GEO LOCATION
     '   update current location
     Private Sub UpdateLocation(sender As StatusChangedEventArgs)
         GetLocation()
     End Sub
 
-    '   GET GEO LOCATION
     Private Async Sub GetLocation()
         Try
-            'GridsOff()
+            'HideAllGrids()
             'MapGrid.Visibility = Visibility.Visible
             Dim geolocator As New Geolocator()
             Dim position As Geoposition = Await geolocator.GetGeopositionAsync
@@ -973,7 +1056,7 @@ Public NotInheritable Class MainPage
         End If
     End Sub
     '   timers
-    Private Sub OneSecTimer_Tick(sender As Object, e As Object)
+    Private Sub OneSecTimer_Tick(ByVal sender As DispatcherTimer, args As Object)
         'currentTimeHourTxt.Text = Date.Now.ToString("hh:mm:ss tt zzz")
         currentTimeHourTxt.Text = Date.Now.ToString("hh")
         currentTimeMinutesTxt.Text = Date.Now.ToString("mm")
@@ -986,7 +1069,7 @@ Public NotInheritable Class MainPage
         currentDateYearTxt.Text = Date.Now.ToString("yyyy")
     End Sub
 
-
+    '   *****************************************************************
     '   Load the available backdrop files. 
     Private Async Sub GetWallpaper()
         Try
@@ -997,8 +1080,8 @@ Public NotInheritable Class MainPage
             Dim folders As New Queue(Of IStorageFolder)()
             Dim files = Await KnownFolders.PicturesLibrary.CreateFileQueryWithOptions(queryOption).GetFilesAsync()
             ' do something with the files
-            For Each file In files
-                WallpaperSelector.Items.Add(file.Name)
+            For Each File In files
+                WallpaperSelector.Items.Add(File.Name)
             Next
         Catch ex As Exception
             ShowStatus("no files")
@@ -1035,7 +1118,7 @@ Public NotInheritable Class MainPage
         RestoreMainGrids()
     End Sub
 
-
+    '   *****************************************************
     '   All Bluetooth stuff here
 
     Private devicePicker As DevicePicker = Nothing
@@ -1147,57 +1230,163 @@ Public NotInheritable Class MainPage
     End Sub
 
 
+    '   ************************************************************************
+    '   MUSIC MANAGER -  from the tools menu
+    Private Sub AudioManagerBtn_Click(sender As Object, e As RoutedEventArgs) Handles AudioManagerBtn.Click
+        HideAllGrids()
+        AudioManagerGrid.Visibility = Visibility.Visible
+        ShowAllMusic()
+    End Sub
+    '   Music populate
+    Private Async Sub ShowAllMusic()
+        Await MusicPopulate()
+    End Sub
+    '   populate the music listbox
+    Private Async Function MusicPopulate() As Task
+        SelectedSong = Nothing
+        If currentFolder Is Nothing Then
+            MusicFilesList.Items.Clear()
+            MusicFilesList.Items.Add(">Music")
+            MusicFilesList.Items.Add(">RemovableStorage")
+        Else
+            MusicFilesList.Items.Clear()
+            MusicFilesList.Items.Add(">..")
+            Dim folders = Await currentFolder.GetFoldersAsync()
+            For Each f In folders
+                MusicFilesList.Items.Add(">" + f.Name)
+            Next
+            Dim query = currentFolder.CreateFileQueryWithOptions(queryOptions)
+            Dim files = Await query.GetFilesAsync()
+            For Each File In files
+                MusicFilesList.Items.Add(File.Name)
+            Next
+        End If
+    End Function
+    Private Async Function BrowseToFolder(filename As String) As Task(Of Boolean)
+        SelectedSong = Nothing
+        If currentFolder Is Nothing Then
+            Select Case filename
+                Case ">Music"
+                    currentFolder = KnownFolders.MusicLibrary
+                    Exit Select
+                Case ">RemovableStorage"
+                    currentFolder = KnownFolders.RemovableDevices
+                    Exit Select
+                Case Else
+                    'case NetworkFolder:
+                    '    // special case... NYI
+                    '    return false;
+                    Throw New Exception("unexpected")
+            End Select
+            SongTxt.Text = "> " + filename.Substring(1)
+        Else
+            If filename = ">.." Then
+                Await MusicFolderUp()
+            ElseIf filename(0) = ">"c Then
+                Dim foldername = filename.Substring(1)
+                Dim folder = Await currentFolder.GetFolderAsync(foldername)
+                currentFolder = folder
+                SongTxt.Text += " > " + foldername
+            Else
+                SelectedSong = Await currentFolder.GetFileAsync(filename)
+                Return True
+            End If
+        End If
+        Await MusicPopulate()
+        Return False
+    End Function
+    Private Async Function MusicFolderUp() As Task
+        If currentFolder Is Nothing Then
+            Return
+        End If
+        Try
+            Dim folder = Await currentFolder.GetParentAsync()
+            currentFolder = folder
+            If currentFolder Is Nothing Then
+                SongTxt.Text = ">"
+            Else
+                Dim breadcrumb = SongTxt.Text
+                breadcrumb = breadcrumb.Substring(0, breadcrumb.LastIndexOf(">"c) - 1)
+                SongTxt.Text = breadcrumb
+            End If
+        Catch generatedExceptionName As Exception
+            currentFolder = Nothing
+            SongTxt.Text = ">"
+        End Try
+    End Function
+    Private Async Sub MusicFiles_KeyUp(ByVal sender As Object, ByVal args As KeyRoutedEventArgs) Handles MusicFilesList.KeyUp
+        If MusicFilesList.SelectedItem IsNot Nothing AndAlso args.Key = Windows.System.VirtualKey.Enter Then
+            If Await BrowseToFolder(MusicFilesList.SelectedItem.ToString()) Then
+                SelectSong()
+            Else
+                MusicFilesList.Focus(FocusState.Keyboard)
+            End If
+        End If
+    End Sub
+    Private Async Sub MusicFiles_DoubleTapped(ByVal sender As Object, ByVal args As DoubleTappedRoutedEventArgs) Handles MusicFilesList.DoubleTapped
+        If MusicFilesList.SelectedItem IsNot Nothing Then
+            If Await BrowseToFolder(MusicFilesList.SelectedItem.ToString()) Then
+                SelectSong()
+            Else
+                MusicFilesList.Focus(FocusState.Keyboard)
+            End If
+        End If
+    End Sub
+    Private Async Sub SelectSong()
+        Try
+            If SelectedSong IsNot Nothing Then
+                SelectedMusicTxt.Text = SelectedSong.Path
+                MyBackgroundAudioStream = Await SelectedSong.OpenAsync(FileAccessMode.Read)
+                MediaElement.SetSource(stream:=MyBackgroundAudioStream, mimeType:=SelectedSong.ContentType)
+            End If
+        Catch ex As Exception
+            ShowStatus(ex.Message.ToString)
+        End Try
+    End Sub
 
+    '   music controls
+    Private Sub PauseMusic()
+        MediaElement.Pause()
+    End Sub
+    Private Sub ResumeMusic()
+        MediaElement.SetSource(MyBackgroundAudioStream, PickerSelectedFile.ContentType)
+    End Sub
 
-
+    '   Audio volume
+    Private Sub MainVolumeSlider_ValueChanged(sender As Object, e As RangeBaseValueChangedEventArgs) Handles MainVolumeSlider.ValueChanged
+        MediaElement.Volume = MainVolumeSlider.Value
+    End Sub
 
     '   close self (audio manager)
     Private Sub AudioManagerOKBtn_Click(sender As Object, e As RoutedEventArgs) Handles AudioManagerOKBtn.Click
         AudioManagerGrid.Visibility = Visibility.Collapsed
     End Sub
-    '   from the tools menu
-    Private Sub AudioManagerBtn_Click(sender As Object, e As RoutedEventArgs) Handles AudioManagerBtn.Click
-        ToolsMenuGrid.Visibility = Visibility.Collapsed
-        AudioManagerGrid.Visibility = Visibility.Visible
+
+
+    '   *********************************************************
+    '   Image file manager button
+    Private Sub ImageViewerBtn_Click(sender As Object, e As RoutedEventArgs) Handles ImageViewerBtn.Click
+        HideAllGrids()
+        PictureGrid.Visibility = Visibility.Visible
+        ImageFilePopulate()
     End Sub
-    '   tools menu toggle
-    Private Sub ToolsDisplayBtn_Click(sender As Object, e As RoutedEventArgs) Handles ToolsDisplayBtn.Click
-        Select Case ToolsMenuGrid.Visibility
-            Case Visibility.Collapsed
-                HideAllGrids()
-                ToolsMenuGrid.Visibility = Visibility.Visible
-                Exit Select
-            Case Visibility.Visible
-                ToolsMenuGrid.Visibility = Visibility.Collapsed
-                RestoreMainGrids()
-        End Select
-    End Sub
-    '   file manager button
-    Private Sub FileMgrBtn_Click(sender As Object, e As RoutedEventArgs) Handles FileMgrBtn.Click
-        Select Case FileManagerGrid.Visibility
-            Case Visibility.Visible
-                FileManagerGrid.Visibility = Visibility.Collapsed
-                Exit Select
-            Case Visibility.Collapsed
-                FileManagerGrid.Visibility = Visibility.Visible
-                FilePopulate()
-        End Select
+    Private Sub CloseImageViewerBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseImageViewerBtn.Click
+        PictureGrid.Visibility = Visibility.Collapsed
     End Sub
     '   Filer populate
-    Private Async Sub FilePopulate()
+    Private Async Sub ImageFilePopulate()
         Await Picker_Populate()
     End Sub
     '   Picker hide
     Private Sub PickerHide()
-        FileManagerGrid.Visibility = Visibility.Collapsed
+        PictureGrid.Visibility = Visibility.Collapsed
     End Sub
     '   Picker Populate
     Private Async Function Picker_Populate() As Task
-        Picker_SelectedFile = Nothing
+        PickerSelectedFile = Nothing
         If currentFolder Is Nothing Then
             lstFiles.Items.Clear()
             lstFiles.Items.Add(">Pictures")
-            lstFiles.Items.Add(">Music")
             lstFiles.Items.Add(">RemovableStorage")
         Else
             lstFiles.Items.Clear()
@@ -1208,20 +1397,17 @@ Public NotInheritable Class MainPage
             Next
             Dim query = currentFolder.CreateFileQueryWithOptions(queryOptions)
             Dim files = Await query.GetFilesAsync()
-            For Each file In files
-                lstFiles.Items.Add(file.Name)
+            For Each File In files
+                lstFiles.Items.Add(File.Name)
             Next
         End If
     End Function
     Private Async Function Picker_BrowseTo(filename As String) As Task(Of Boolean)
-        Picker_SelectedFile = Nothing
+        PickerSelectedFile = Nothing
         If currentFolder Is Nothing Then
             Select Case filename
                 Case ">Pictures"
                     currentFolder = KnownFolders.PicturesLibrary
-                    Exit Select
-                Case ">Music"
-                    currentFolder = KnownFolders.MusicLibrary
                     Exit Select
                 Case ">RemovableStorage"
                     currentFolder = KnownFolders.RemovableDevices
@@ -1242,7 +1428,7 @@ Public NotInheritable Class MainPage
                 currentFolder = folder
                 lblBreadcrumb.Text += " > " + foldername
             Else
-                Picker_SelectedFile = Await currentFolder.GetFileAsync(filename)
+                PickerSelectedFile = Await currentFolder.GetFileAsync(filename)
                 Return True
             End If
         End If
@@ -1269,7 +1455,7 @@ Public NotInheritable Class MainPage
         End Try
     End Function
 
-    Private Async Sub LstFiles_KeyUp(ByVal sender As Object, ByVal args As KeyRoutedEventArgs)
+    Private Async Sub LstFiles_KeyUp(ByVal sender As Object, ByVal args As KeyRoutedEventArgs) Handles lstFiles.KeyUp
         If lstFiles.SelectedItem IsNot Nothing AndAlso args.Key = Windows.System.VirtualKey.Enter Then
             If Await Picker_BrowseTo(lstFiles.SelectedItem.ToString()) Then
                 SelectFile()
@@ -1288,18 +1474,26 @@ Public NotInheritable Class MainPage
         End If
     End Sub
     Private Async Sub SelectFile()
+        Dim tempBit As New BitmapImage()
         Try
-            If Picker_SelectedFile IsNot Nothing Then
-                txtFileName.Text = Picker_SelectedFile.Path
-                Dim stream = Await Picker_SelectedFile.OpenAsync(FileAccessMode.Read)
-                MediaElement.SetSource(stream, Picker_SelectedFile.ContentType)
+            If PickerSelectedFile IsNot Nothing Then
+                txtFileName.Text = PickerSelectedFile.Path
+                Dim ImageFileStream = Await PickerSelectedFile.OpenAsync(FileAccessMode.Read)
+                Await tempBit.SetSourceAsync(ImageFileStream)
+                previewImage.Source = tempBit
             End If
         Catch ex As Exception
             ShowStatus(ex.Message.ToString)
         End Try
     End Sub
 
+
+    '   *************************************************************************
     '   Speech stuff here...
+    Private Sub SpeechPlusBtn_Click(sender As Object, e As RoutedEventArgs) Handles SpeechPlusBtn.Click
+        HideAllGrids()
+        SpeechPlusGrid.Visibility = Visibility.Visible
+    End Sub
     Private Async Sub Start_Listening()
         Dim result As SpeechRecognitionResult = Await MyListener.RecognizeAsync()
     End Sub
@@ -1312,38 +1506,27 @@ Public NotInheritable Class MainPage
         MySpeaker.Voice = voice
     End Sub
     Private Async Sub Talker(voice, message)
+        If isPlaying Then
+
+        End If
         Try
             If (Not isTalking) Then
                 isTalking = True
                 MySpeaker.Voice = SpeechSynthesizer.AllVoices.FirstOrDefault(Function(v) v.DisplayName.Contains(voice))
-                MyStream = Await MySpeaker.SynthesizeTextToStreamAsync(message)
-                MediaElement.SetSource(MyStream, MyStream.ContentType)
+                MySpeechStream = Await MySpeaker.SynthesizeTextToStreamAsync(message)
+                MediaElement.SetSource(MySpeechStream, MySpeechStream.ContentType)
                 isTalking = False
             End If
         Catch ex As Exception
             ShowStatus(ex.ToString)
         End Try
     End Sub
-    Private Sub Element_MediaEnded(ByVal sender As Object, ByVal args As RoutedEventArgs)
-        MediaElement.Stop()
+    '   Close SpeechPlus Grid
+    Private Sub CloseSpeechPlusBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseSpeechPlusBtn.Click
+        SpeechPlusGrid.Visibility = Visibility.Collapsed
+        RestoreMainGrids()
     End Sub
-
-    '   Audio
-    Private Sub MainVolumeSlider_ValueChanged(sender As Object, e As RangeBaseValueChangedEventArgs) Handles MainVolumeSlider.ValueChanged
-        MediaElement.Volume = MainVolumeSlider.Value
-    End Sub
-
-    '   file manager image selected stuff...
-    Private Async Sub LoadImagePreview()
-        Dim tempBit As New BitmapImage()
-        Dim LoadedStorageFile As StorageFile = Await KnownFolders.PicturesLibrary.GetFileAsync(WallpaperSelector.SelectedItem)
-        Using imagefilestream As IRandomAccessStream = Await LoadedStorageFile.OpenAsync(FileAccessMode.Read)
-            Await tempBit.SetSourceAsync(imagefilestream)
-        End Using
-        ' point to the bitmap
-        previewImage.Source = tempBit
-    End Sub
-
+    '   listen on in Speech Plus grid
     Private Sub ListenEnableSw_Toggled(sender As Object, e As RoutedEventArgs) Handles ListenEnableSw.Toggled
         If ListenEnableSw.IsOn Then
             Stop_Listening()
@@ -1363,7 +1546,7 @@ Public NotInheritable Class MainPage
                 LocationOrientationGrid.Visibility = Visibility.Visible
         End Select
     End Sub
-    '   Browser grid
+    '   Browser grid *******************************************
     Private Sub BrowserBtn_Click(sender As Object, e As RoutedEventArgs) Handles BrowserBtn.Click
 
         Select Case BrowserGrid.Visibility
@@ -1377,7 +1560,7 @@ Public NotInheritable Class MainPage
         End Select
 
     End Sub
-    '   Automation grid
+    '   Automation grid ***************
     Private Sub AutomationBtn_Click(sender As Object, ByVal args As RoutedEventArgs) Handles AutomationBtn.Click
         Select Case AutoGrid.Visibility
             Case Visibility.Visible
@@ -1520,4 +1703,6 @@ Public NotInheritable Class MainPage
     Private Sub RemoveGuestBtn_Click(sender As Object, e As RoutedEventArgs) Handles RemoveGuestBtn.Click
 
     End Sub
+
+
 End Class
