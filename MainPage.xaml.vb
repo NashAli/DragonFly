@@ -454,7 +454,7 @@ Public NotInheritable Class MainPage
         HideAllGrids()
         RestoreMainGrids()
         LoadBookmarks()
-        MyBrowser.Navigate(New Uri(GoogleHome))
+        MyBrowser.Navigate(New Uri(BingHome))
         MediaElement.Volume = 0.15
         MainVolumeSlider.Value = 0.15
         Talker(David, IntroText)
@@ -927,12 +927,14 @@ Public NotInheritable Class MainPage
         Dim access = Await WiFiAdapter.RequestAccessAsync()
         If result.Count >= 1 Then
             If access <> WiFiAccessStatus.Allowed Then
-                ShowStatus("WiFi Adapter! - No Access")
+                InfoStatusTxt.Text = "WiFi Adapter! - No Access"
+
             Else
-                ShowStatus("WiFi Adapter! - Wifi Access")
+                InfoStatusTxt.Text = "WiFi Adapter! - Wifi Access"
+
             End If
         Else
-            ShowStatus("No WiFi Adapter!")
+            InfoStatusTxt.Text = "No WiFi Adapter!"
         End If
     End Sub
 
@@ -984,7 +986,7 @@ Public NotInheritable Class MainPage
         Catch ex As Exception
 
         End Try
-        CheckForWifiAdapters()
+
     End Sub
 
     '   ******************************************************************************
