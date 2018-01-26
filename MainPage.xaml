@@ -18,23 +18,27 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 -->
+
 <Page
-    x:Class="DragonFlyRC.MainPage"
+    x:Class="DragonFly.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DragonFly"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" RequestedTheme="Dark">
+    mc:Ignorable="d">
     <Page.Resources>
-        <FontFamily x:Key="SFGothican">Fonts/SF Gothican Bold.ttf#SF Gothican</FontFamily>
+
         <FontFamily x:Key="roboto">Fonts/Roboto-Regular.ttf#Roboto</FontFamily>
         <FontFamily x:Key="weather">Fonts/weathericons.ttf#Weather Icons</FontFamily>
+        <FontFamily x:Key="Gothic">Fonts/SF Gothican.ttf#SF Gothican</FontFamily>
         <Visibility x:Key="ON">Visible</Visibility>
         <Visibility x:Key="OFF">Collapsed</Visibility>
+
     </Page.Resources>
 
     <!-- MAIN GRID -->
-    <Grid x:Name="MainGrid" RequestedTheme="Dark">
+    <Grid x:Name="MainGrid" RequestedTheme="Dark" Visibility="Visible">
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                 <GradientStop Color="#FF00020C" Offset="0.157"/>
@@ -42,35 +46,37 @@
                 <GradientStop Color="#FE0C0F1E" Offset="0.296"/>
             </LinearGradientBrush>
         </Grid.Background>
-        <MediaElement x:Name="MediaElement" RequestedTheme="Dark" />
-        <Image x:Name="WallpaperImg" HorizontalAlignment="Left" Height="480" VerticalAlignment="Top" Width="800" RequestedTheme="Dark" Margin="0,0,0,0" Stretch="UniformToFill"/>
-        <Image x:Name="mainDragonflyImg" HorizontalAlignment="Left" Height="208" Margin="15,18,0,0" VerticalAlignment="Top" Width="285" Source="Media/DragonFly1.png" RequestedTheme="Dark"/>
-        <TextBlock HorizontalAlignment="Left" Margin="190,38,0,0" TextWrapping="Wrap" Text="DragonFly Pi" VerticalAlignment="Top" FontSize="72" FontWeight="Bold" FontFamily="{StaticResource SFGothican}" Foreground="#FF816660" Height="90" Width="292"/>
+
+        <MediaElement x:Name="MyPlayer" RequestedTheme="Dark" Margin="400,242,399,237" />
+        <Image x:Name="WallpaperImg" HorizontalAlignment="Left" Height="480" VerticalAlignment="Top" Width="800" RequestedTheme="Dark" Margin="0,0,0,0" Stretch="UniformToFill" Visibility="{StaticResource OFF}"/>
+        <Image x:Name="mainDragonflyImg" HorizontalAlignment="Left" Height="159" Margin="15,18,0,0" VerticalAlignment="Top" Width="218" Source="Media/DragonFly1.png" RequestedTheme="Dark" Visibility="{StaticResource ON}"/>
+        <TextBlock x:Name="MainTitleTxt" HorizontalAlignment="Left" Margin="153,38,0,0" TextWrapping="Wrap" Text="DragonFly" VerticalAlignment="Top" FontSize="62" Foreground="#FFEE340B" Height="105" Width="603"  RequestedTheme="Dark" FontFamily="{StaticResource Gothic}"/>
         <Image x:Name="targetDragonflyImg" HorizontalAlignment="Left" Height="79" Margin="73,125,0,0" VerticalAlignment="Top" Width="100" Source="Media/DragonFly-2.png" RenderTransformOrigin="1.23,0.494" RequestedTheme="Dark"/>
         <TextBlock x:Name="pcbValueTxt" HorizontalAlignment="Left" Margin="6,461,0,0" TextWrapping="Wrap" Text="DragonFly Pi PCB V1.0 present" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" FontSize="12"/>
 
         <!--MAIN GRID BUTTONS -->
-        <AppBarButton x:Name="PowerBtn" HorizontalAlignment="Left" Label="Power Options" Margin="727,401,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Background="#E50E1A6B">
+        <AppBarButton x:Name="PowerBtn" HorizontalAlignment="Left" Label="Power Options" Margin="720,396,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Height="73" Width="68">
             <AppBarButton.Icon>
-                <BitmapIcon UriSource="Assets/ic_power_settings_new_white_24dp.png"/>
+                <BitmapIcon UriSource="Glyphs/ic_power_settings_new_white_24dp.png"/>
             </AppBarButton.Icon>
         </AppBarButton>
-
-        <AppBarButton x:Name="SystemInfoDisplayBtn" HorizontalAlignment="Left" Label="System Info" Margin="7,201,0,0" VerticalAlignment="Top" Icon="Help" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Visibility="{StaticResource ON}" Height="60" Background="#E50E1B70"/>
-        <AppBarButton x:Name="ToolsDisplayBtn" HorizontalAlignment="Left" Icon="Repair" Label="Tools" Margin="7,281,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Background="#E50E1B71"/>
-
-        <!-- STATUS GRID -->
-        <Grid x:Name="StatusGrid" BorderBrush="#FFE81010" BorderThickness="3" Background="Black" CornerRadius="12" HorizontalAlignment="Left" Height="37" Margin="420,6,0,0" RequestedTheme="Dark" VerticalAlignment="Top" Width="373" Visibility="{StaticResource ON}">
-            <TextBlock x:Name="GeneralStatusTxt" HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="status - waiting" VerticalAlignment="Top" Width="186" FontFamily="{StaticResource roboto}"/>
+        <!-- POWER OPTIONS SUB-GRID -->
+        <Grid x:Name="PowerOptionsGrid" HorizontalAlignment="Left" Height="100" Margin="443,268,0,0" VerticalAlignment="Top" Width="246" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="12,12,12,12" BorderBrush="#FFF0F00B" Visibility="Collapsed">
+            <AppBarButton x:Name="ShutDownBtn" HorizontalAlignment="Left" Label="Shutdown" Margin="47,18,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Width="68" FontFamily="{StaticResource roboto}" Height="60" Icon="Cancel"/>
+            <AppBarButton x:Name="ReBootBtn" HorizontalAlignment="Left" Icon="Refresh" Label="Reboot" Margin="139,18,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
         </Grid>
+        <!-- MAIN GRID BUTTONS -->
+        <AppBarButton x:Name="SystemInfoDisplayBtn" HorizontalAlignment="Left" Label="System Info" Margin="7,201,0,0" VerticalAlignment="Top" Icon="Help" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Visibility="{StaticResource ON}" Height="69" Width="75" FontSize="11"/>
+        <AppBarButton x:Name="ToolsDisplayBtn" HorizontalAlignment="Left" Icon="Repair" Label="Tools" Margin="7,281,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+
 
 
         <!-- SYSTEM INFO GRID -->
-        <Grid x:Name="SystemInfoGrid" HorizontalAlignment="Left" Height="453" Margin="65,17,0,0" VerticalAlignment="Top" Width="728" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FFD80F0F" Background="#D8180E1B" Visibility="{StaticResource OFF}">
+        <Grid x:Name="SystemInfoGrid" HorizontalAlignment="Left" Height="453" Margin="82,17,0,0" VerticalAlignment="Top" Width="711" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FFD80F0F" Background="#D8180E1B" Visibility="Collapsed">
             <TextBlock x:Name="ApplicationNameTxt" HorizontalAlignment="Left" Margin="518,32,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
             <TextBlock x:Name="PackageVersionTxt" HorizontalAlignment="Left" Margin="518,54,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
 
-            <TextBlock x:Name="SysInfoTxt" HorizontalAlignment="Right" Margin="0,7,16,0" TextWrapping="Wrap" Text="System Infomation" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFD1E418" FontWeight="Bold" TextDecorations="Underline"/>
+            <TextBlock x:Name="SysInfoTxt" HorizontalAlignment="Right" Margin="0,7,16,0" TextWrapping="Wrap" Text="System Infomation" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFD1E418" FontWeight="Bold"/>
             <TextBlock x:Name="SystemFamilyTxt" HorizontalAlignment="Left" Margin="18,2,0,0" TextWrapping="Wrap" Text="WINDOWS TYPE" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" FontSize="48" Foreground="#FF0988F1"/>
             <TextBlock x:Name="SystemArchitectureTxt" HorizontalAlignment="Left" Margin="47,137,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" FontSize="12"/>
             <TextBlock x:Name="DeviceModelTxt" HorizontalAlignment="Left" Margin="47,103,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" FontSize="16" Width="175" Foreground="#FFF30CAA"/>
@@ -100,59 +106,127 @@
             <TextBlock x:Name="MachineTypeTxt" HorizontalAlignment="Left" Margin="78,79,0,0" TextWrapping="Wrap" Text="Machine" VerticalAlignment="Top" RequestedTheme="Dark" Foreground="#FFF31414"/>
         </Grid>
 
-        <!-- USER SETTINGS GRID -->
-        <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Height="357" Margin="215,75,0,0" VerticalAlignment="Top" Width="370" RequestedTheme="Dark" BorderBrush="#FF990B0B" BorderThickness="3" CornerRadius="14" Background="#F2EC8035" Visibility="{StaticResource OFF}">
-            <ToggleSwitch x:Name="WallpaperSw" Header="Wallpaper" HorizontalAlignment="Left" Margin="12,43,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Visibility="{StaticResource ON}" BorderThickness="5,0,15,0" BorderBrush="#FF0F5D61"/>
-            <AppBarButton x:Name="SettingsGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="285,11,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF23D31B"/>
-            <AppBarButton x:Name="WifiAccessBtn" HorizontalAlignment="Left" Icon="FourBars" Label="WiFi" Margin="22,266,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFE21DBE"/>
-            <AppBarButton x:Name="BluetoothManagerBtn" HorizontalAlignment="Left" Label="Bluetooth Manager" Margin="97,266,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" Foreground="#FF0F1BA0">
+
+
+        <!--TOOL MENU 1 -->
+        <Grid x:Name="ToolsMenuGrid" HorizontalAlignment="Left" Height="201" Margin="96,229,0,0" VerticalAlignment="Top" Width="624" Visibility="{StaticResource OFF}" RequestedTheme="Dark" BorderBrush="#FF60C7C2" BorderThickness="3" CornerRadius="6" Background="#CC000000">
+            <AppBarButton x:Name="ImageViewerBtn" HorizontalAlignment="Left" Icon="Document" Label="Image Viewer" Margin="11,9,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFECE214"/>
+            <AppBarButton x:Name="GeoBtn" HorizontalAlignment="Left" Icon="Globe" Label="Geo" Margin="111,10,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFE01568" Width="71"/>
+            <AppBarButton x:Name="BrowserBtn" HorizontalAlignment="Left" Icon="Bookmarks" Label="Browser" Margin="211,9,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FF16D1DA"/>
+            <AppBarButton x:Name="AutomationBtn" HorizontalAlignment="Left" Icon="Home" Label="Automation" Margin="315,8,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="AdminBtn" HorizontalAlignment="Left" Icon="Admin" Label="Admin" Margin="12,100,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Foreground="#FFF00C0C" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="AudioManagerBtn" HorizontalAlignment="Left" Icon="Audio" Label="Music" Margin="315,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFC9F01B"/>
+            <AppBarButton x:Name="AppsMenuBtn" HorizontalAlignment="Left" Icon="AllApps" Label="Installed Apps" Margin="113,102,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF15F33D"/>
+            <AppBarButton x:Name="ClockCalendarShowBtn" HorizontalAlignment="Left" Label="Clock/Calendar" Margin="214,102,0,0" VerticalAlignment="Top" Foreground="#FF1B25EA" Height="68" RequestedTheme="Dark">
                 <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_bluetooth_white_24dp.png"/>
+                    <BitmapIcon UriSource="Glyphs/ic_access_time_white_24dp.png" Margin="0,0,0,-5" Width="25"/>
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton x:Name="ShowWeatherBtn" HorizontalAlignment="Left" Icon="Street" Label="Weather" Margin="427,9,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFDD11F1"/>
+            <AppBarButton x:Name="SettingsAccessBtn" HorizontalAlignment="Left" Icon="Setting" Label="Settings" Margin="516,9,0,0" VerticalAlignment="Top" Height="66" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="MoreToolsBtn" HorizontalAlignment="Left" Icon="More" Label="More Tools" Margin="516,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="SpeechPlusBtn" HorizontalAlignment="Left" Icon="Volume" Label="Speech" Margin="423,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+        </Grid>
+
+        <!-- TOOL MENU 2 -->
+        <Grid x:Name="ToolsTwoGrid" HorizontalAlignment="Left" Height="175" Margin="145,205,0,0" VerticalAlignment="Top" Width="580" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF1EF314" Background="#FF032049" Visibility="{StaticResource OFF}">
+            <AppBarButton x:Name="ConfigureBtn" HorizontalAlignment="Left" Icon="Repair" Label="Configure" Margin="12,10,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="GuestMgmtBtn" HorizontalAlignment="Left" Icon="Contact" Label="Guest Management" Margin="88,13,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" Width="80"/>
+            <AppBarButton x:Name="SensorsBtn" HorizontalAlignment="Left" Icon="Home" Label="Sensors" Margin="491,12,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+        </Grid>
+
+        <!-- USER SETTINGS GRID -->
+        <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Height="357" Margin="170,75,0,0" VerticalAlignment="Top" Width="545" RequestedTheme="Dark" BorderBrush="#FF990B0B" BorderThickness="3" CornerRadius="14" Background="#F2000000" Visibility="Collapsed">
+            <ToggleSwitch x:Name="WallpaperSw" Header="Wallpaper" HorizontalAlignment="Left" Margin="12,43,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Visibility="{StaticResource ON}" BorderThickness="5,0,15,0" BorderBrush="#FF0F5D61"/>
+            <AppBarButton x:Name="SettingsGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="455,11,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="White"/>
+            <AppBarButton x:Name="WifiAccessBtn" HorizontalAlignment="Left" Icon="FourBars" Label="WiFi" Margin="22,266,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFF8FAFF"/>
+            <AppBarButton x:Name="BluetoothManagerBtn" HorizontalAlignment="Left" Label="Bluetooth Manager" Margin="97,266,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" Foreground="White">
+                <AppBarButton.Icon>
+                    <BitmapIcon UriSource="Glyphs/ic_bluetooth_white_24dp.png"/>
                 </AppBarButton.Icon>
             </AppBarButton>
 
-            <ListBox x:Name="WallpaperSelector" HorizontalAlignment="Left" Height="104" Margin="12,135,0,0" VerticalAlignment="Top" Width="180"/>
-            <TextBlock x:Name="UserSettingsTitleTxt" HorizontalAlignment="Left" Margin="8,7,0,0" TextWrapping="Wrap" Text="User Settings" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FF0F5D61" FontWeight="Bold"/>
+            <ListBox x:Name="WallpaperSelector" HorizontalAlignment="Left" Height="104" Margin="15,138,0,0" VerticalAlignment="Top" Width="272" Background="Black"/>
+            <TextBlock x:Name="UserSettingsTitleTxt" HorizontalAlignment="Left" Margin="8,7,0,0" TextWrapping="Wrap" Text="User Settings" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFE5EE2A" FontWeight="Bold"/>
+            <AppBarButton x:Name="UpdatePrefsBtn" HorizontalAlignment="Left" Icon="Refresh" Label="Update Prefs" Margin="451,259,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
         </Grid>
 
+
         <!-- WIFI CONNECT GRID -->
-        <Grid x:Name="WifiConnectGrid" HorizontalAlignment="Left" Height="248" Margin="235,130,0,0" VerticalAlignment="Top" Width="345" RequestedTheme="Dark" BorderThickness="3" CornerRadius="14" BorderBrush="#FF990B0B" Visibility="{StaticResource OFF}">
+        <Grid x:Name="WifiConnectGrid" HorizontalAlignment="Left" Height="280" Margin="268,155,0,0" VerticalAlignment="Top" Width="345" RequestedTheme="Dark" BorderThickness="3" CornerRadius="14" BorderBrush="#FF990B0B" Background="Black" Visibility="Collapsed">
             <TextBlock x:Name="NetworkWifiInfoTxt" HorizontalAlignment="Left" Margin="18,13,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="215" Height="45"/>
-            <ComboBox x:Name="AccessPoints" HorizontalAlignment="Left" Margin="16,74,0,0" VerticalAlignment="Top" Width="304"/>
-            <AppBarButton x:Name="ConnectToNetworkBtn" HorizontalAlignment="Left" Icon="Contact" Label="Connect" Margin="252,174,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="WifiConnectGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="8,172,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <ComboBox x:Name="AccessPoints" HorizontalAlignment="Left" Margin="16,122,0,0" VerticalAlignment="Top" Width="304" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="ConnectToNetworkBtn" HorizontalAlignment="Left" Icon="Contact" Label="Connect" Margin="252,200,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="WifiConnectGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="8,200,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
         </Grid>
 
 
         <!-- BLUETOOTH MANAGER GRID -->
-        <Grid x:Name="BluetoothActivityGrid" HorizontalAlignment="Left" Height="301" Margin="173,124,0,0" VerticalAlignment="Top" Width="547" RequestedTheme="Dark" BorderBrush="#FFCAE618" BorderThickness="3" CornerRadius="12" Background="#FF1C1F25" Visibility="{StaticResource OFF}">
-            <AppBarButton x:Name="CloseBTMBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="459,227,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+        <Grid x:Name="BluetoothActivityGrid" HorizontalAlignment="Left" Height="301" Margin="135,124,0,0" VerticalAlignment="Top" Width="585" RequestedTheme="Dark" BorderBrush="#FFCAE618" BorderThickness="3" CornerRadius="12" Background="Black" Visibility="{StaticResource OFF}">
+            <AppBarButton x:Name="CloseBTMBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="494,227,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
             <TextBlock HorizontalAlignment="Left" Margin="210,3,0,0" TextWrapping="Wrap" Text="Bluetooth Manager" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
             <ListView x:Name="BluetoothDeviceList" HorizontalAlignment="Left" Height="205" Margin="35,72,0,0" VerticalAlignment="Top" Width="220" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
             <ListView x:Name="PairedDevicesList" HorizontalAlignment="Left" Height="70" Margin="282,139,0,0" VerticalAlignment="Top" Width="235"/>
             <AppBarButton x:Name="BluetoothPairBtn" HorizontalAlignment="Left" Label="Pair" Margin="289,50,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}">
                 <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_bluetooth_connected_white_24dp.png"/>
+                    <BitmapIcon UriSource="Glyphs/ic_bluetooth_connected_white_24dp.png"/>
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarButton x:Name="BtScanBtn" HorizontalAlignment="Left" Label="Scan" Margin="469,50,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}">
                 <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_bluetooth_searching_white_24dp.png"/>
+                    <BitmapIcon UriSource="Glyphs/ic_bluetooth_searching_white_24dp.png"/>
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarButton x:Name="BluetoothUnPairBtn" HorizontalAlignment="Left" Label="UnPair" Margin="382,49,0,0" VerticalAlignment="Top" RequestedTheme="Dark">
                 <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_bluetooth_white_24dp.png"/>
+                    <BitmapIcon UriSource="Glyphs/ic_bluetooth_connected_white_24dp.png"/>
                 </AppBarButton.Icon>
             </AppBarButton>
-            <ToggleSwitch x:Name="BluetoothEnableSw" Header="Bluetooth" HorizontalAlignment="Left" Margin="282,222,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" OnContent="Enabled" OffContent="Disabled" BorderThickness="3,0" BorderBrush="#FF0D31AC"/>
+            <ToggleSwitch x:Name="BluetoothEnableSw" Header="Bluetooth" HorizontalAlignment="Left" Margin="282,222,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" OnContent="Enabled" OffContent="Disabled" BorderThickness="5,0,10,0" BorderBrush="#FF0D31AC"/>
         </Grid>
 
+
+        <!-- CONFGURE GRID -->
+        <Grid x:Name="ConfigureGrid" HorizontalAlignment="Left" Height="242" 
+              Margin="193,148,0,0" VerticalAlignment="Top" Width="510" RequestedTheme="Dark" Background="#FF380303" BorderBrush="#FFF1F112" BorderThickness="3,3,3,3" CornerRadius="12,12,12,12" Visibility="Collapsed">
+            <AppBarButton x:Name="CloseConfigBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="414,39,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="FingerBtn" HorizontalAlignment="Left" Icon="Accept" Label="Finger" Margin="414,153,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock HorizontalAlignment="Left" Margin="24,15,0,0" Text="Configuration Options" TextWrapping="Wrap" VerticalAlignment="Top"/>
+
+        </Grid>
+
+        <!-- FINGERPRINT DEBUG GRID -->
+        <Grid x:Name="FingerprintGrid" HorizontalAlignment="Left" Height="445" Margin="107,24,0,0" VerticalAlignment="Top" Width="614" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="12,12,12,12" BorderBrush="#FFD42222" Background="#C61F032C" Visibility="Collapsed">
+            <Image x:Name="FingerPrintImage" HorizontalAlignment="Left" Height="138" Margin="22,14,0,0" VerticalAlignment="Top" Width="100" RequestedTheme="Dark" Source="Media/fingerprintplaceholder.jpg" Stretch="UniformToFill"/>
+            <Image x:Name="OwnerPicture" HorizontalAlignment="Left" Height="100" Margin="161,54,0,0" VerticalAlignment="Top" Width="86" RequestedTheme="Dark" Source="Media/nophoto.jpg" Stretch="UniformToFill"/>
+            <TextBlock x:Name="FpTTxt" HorizontalAlignment="Left" Margin="246,4,0,0" Text="Fingerprint Module" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="portStatus" HorizontalAlignment="Left" Margin="25,413,0,0" Text="portstatus" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="CloseFingerModBtn" HorizontalAlignment="Left" Icon="Accept" Label="Close" Margin="516,20,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <TextBlock x:Name="CommandTxt" HorizontalAlignment="Left" Margin="26,390,0,0" Text="command" TextWrapping="Wrap" VerticalAlignment="Top" Width="311" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="BytesReadTxt" HorizontalAlignment="Left" Margin="35,194,0,0" Text="rec bytes" TextWrapping="Wrap" VerticalAlignment="Top" Height="26" Width="86" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="TotalUsersTxt" HorizontalAlignment="Left" Margin="291,47,0,0" Text="Total Users :" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="rcvdPayloadTxt" HorizontalAlignment="Left" Margin="37,226,0,0" Text="Payload" TextWrapping="Wrap" VerticalAlignment="Top" Height="125" Width="425"/>
+            <TextBlock x:Name="ModuleStatusTxt" HorizontalAlignment="Left" Margin="165,190,0,0" Text="modstat" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <TextBlock x:Name="RecStatusTxt" HorizontalAlignment="Left" Margin="326,189,0,0" Text="recstat" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <AppBarButton x:Name="FingCommandMenuBtn" HorizontalAlignment="Left" Icon="Library" Label="Menu" Margin="515,94,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+        </Grid>
+
+        <Grid x:Name="FingerprintCommandGrid" RequestedTheme="Dark" Background="#FF5B3131" 
+              BorderBrush="#FFE4C70C" BorderThickness="3,3,3,3" CornerRadius="12,12,12,12" Margin="35,75,188,282" Visibility="Collapsed">
+            <AppBarButton x:Name="DeviceStatusBtn" HorizontalAlignment="Left" Icon="Preview" Label="Status" Margin="482,28,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="AddPrintBtn" HorizontalAlignment="Left" Icon="Add" Label="ADD" Margin="391,28,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="DeleteDBBtn" HorizontalAlignment="Left" Icon="Remove" Label="DELETE ALL" Margin="298,28,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="GetPrintBtn" HorizontalAlignment="Left" Icon="Scan" Label="AQUIRE" Margin="215,28,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="CloseFCGridBtn" HorizontalAlignment="Left" Icon="Accept" Label="CLOSE" Margin="13,28,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+        </Grid>
+
+
+
         <!-- AUDIO MANAGER GRID -->
-        <Grid x:Name="AudioManagerGrid" HorizontalAlignment="Left" Height="411" Margin="143,58,0,0" VerticalAlignment="Top" Width="563" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FFE81010" Background="#FF0E2E24" Visibility="{StaticResource OFF}">
+        <Grid x:Name="AudioManagerGrid" HorizontalAlignment="Left" Height="411" Margin="90,58,0,0" VerticalAlignment="Top" Width="616" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FFE81010" Background="#FF0E2E24" Visibility="{StaticResource OFF}">
             <AppBarButton x:Name="AudioManagerOKBtn" HorizontalAlignment="Right" Icon="Accept" Label="OK" Margin="0,15,21,0" VerticalAlignment="Top" Height="71" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
-            <Slider x:Name="MainVolumeSlider" HorizontalAlignment="Right" Margin="0,123,21,0" VerticalAlignment="Top" Width="37" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Maximum="1" LargeChange="0.1" SmallChange="0.001" StepFrequency="0.1" Foreground="#FF061827" Height="154" Orientation="Vertical"/>
-            <ListView x:Name="MusicFilesList" HorizontalAlignment="Left" Height="251" Margin="13,103,0,0" VerticalAlignment="Top" Width="245"/>
+            <Slider x:Name="MainVolumeSlider" HorizontalAlignment="Right" Margin="0,129,27,0" VerticalAlignment="Top" Width="38" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Maximum="1" LargeChange="0.1" SmallChange="0.05" StepFrequency="0.05" Foreground="#FF061827" Height="254" Orientation="Vertical" TickFrequency="0.1" TickPlacement="Outside"/>
+            <ListView x:Name="MusicFilesList" HorizontalAlignment="Left" Height="251" Margin="22,112,0,0" VerticalAlignment="Top" Width="466"/>
             <TextBlock x:Name="SongTxt" HorizontalAlignment="Left" Margin="17,13,0,0" TextWrapping="Wrap" Text="song" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Width="371"/>
             <TextBlock x:Name="SelectedMusicTxt" HorizontalAlignment="Left" Margin="17,49,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
         </Grid>
@@ -166,78 +240,76 @@
         </Grid>
 
 
-        <!--TOOL MENU 1 -->
-        <Grid x:Name="ToolsMenuGrid" HorizontalAlignment="Left" Height="201" Margin="96,229,0,0" VerticalAlignment="Top" Width="624" Visibility="{StaticResource OFF}" RequestedTheme="Dark" BorderBrush="#FF60C7C2" BorderThickness="3" CornerRadius="6" Background="#CC000000">
-            <AppBarButton x:Name="ImageViewerBtn" HorizontalAlignment="Left" Icon="Document" Label="Image Viewer" Margin="11,9,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFECE214"/>
-            <AppBarButton x:Name="GeoBtn" HorizontalAlignment="Left" Icon="Globe" Label="Geo" Margin="111,10,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFE01568" Width="71"/>
-            <AppBarButton x:Name="BrowserBtn" HorizontalAlignment="Left" Icon="Bookmarks" Label="Browser" Margin="211,9,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FF16D1DA"/>
-            <AppBarButton x:Name="AutomationBtn" HorizontalAlignment="Left" Icon="Home" Label="Automation" Margin="315,8,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
-            <AppBarButton x:Name="AdminBtn" HorizontalAlignment="Left" Icon="Admin" Label="Admin" Margin="12,100,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Foreground="#FFF00C0C" FontFamily="{StaticResource roboto}" Click="AdminBtn_Click"/>
-            <AppBarButton x:Name="AudioManagerBtn" HorizontalAlignment="Left" Icon="Audio" Label="Music" Margin="315,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Foreground="#FFC9F01B"/>
-            <AppBarButton x:Name="AppsMenuBtn" HorizontalAlignment="Left" Icon="AllApps" Label="Installed Apps" Margin="113,102,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF15F33D"/>
-            <AppBarButton x:Name="ClockCalendarShowBtn" HorizontalAlignment="Left" Label="Clock/Calendar" Margin="214,102,0,0" VerticalAlignment="Top" Foreground="#FF1B25EA" Height="68" RequestedTheme="Dark">
-                <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_access_time_white_24dp.png" Margin="0,0,0,-5" Width="25"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarButton x:Name="ShowWeatherBtn" HorizontalAlignment="Left" Icon="Street" Label="Weather" Margin="427,9,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FFDD11F1"/>
-            <AppBarButton x:Name="SettingsAccessBtn" HorizontalAlignment="Left" Icon="Setting" Label="Settings" Margin="516,9,0,0" VerticalAlignment="Top" Height="66" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
-            <AppBarButton x:Name="MoreToolsBtn" HorizontalAlignment="Left" Icon="More" Label="More Tools" Margin="516,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="SpeechPlusBtn" HorizontalAlignment="Left" Icon="Volume" Label="Speech" Margin="423,102,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
-        </Grid>
-
-        <!-- TOOL MENU 2 -->
-        <Grid x:Name="ToolsTwoGrid" HorizontalAlignment="Left" Height="175" Margin="145,205,0,0" VerticalAlignment="Top" Width="580" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF1EF314" Background="#FF032049" Visibility="{StaticResource OFF}">
-            <AppBarButton x:Name="ConfigureBtn" HorizontalAlignment="Left" Icon="Repair" Label="Configure" Margin="12,10,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="GuestMgmtBtn" HorizontalAlignment="Left" Icon="Contact" Label="Guest Management" Margin="88,13,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" Width="80"/>
-        </Grid>
-
-        <!-- FILE MANAGER -->
+        <!-- FILE MANAGER SUB-GRID -->
         <Grid x:Name="FileManagerGrid" HorizontalAlignment="Left" Height="387" Margin="148,52,0,0" VerticalAlignment="Top" Width="437" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FFD61313" Background="#FF0B5053" Visibility="{StaticResource OFF}">
             <TextBlock x:Name="FileManagerGridTitle" HorizontalAlignment="Left" Margin="8,5,0,0" TextWrapping="Wrap" Text="File Manager" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
         </Grid>
 
-        <!-- BROWSER GRID -->
-        <Grid x:Name="BrowserGrid" HorizontalAlignment="Left" Height="443" Margin="12,25,0,0" VerticalAlignment="Top" Width="776" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF4D0404" Background="#FF322E2E" Visibility="Collapsed">
-            <TextBlock x:Name="webAddressTxt" HorizontalAlignment="Left" Margin="10,9,0,0" TextWrapping="Wrap" Text="Browser" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Width="381"/>
-            <WebView x:Name="MyBrowser" HorizontalAlignment="Left" Height="371" Margin="9,56,0,0" VerticalAlignment="Top" Width="675" RequestedTheme="Dark"/>
-            <ComboBox x:Name="BookmarksComboBox" HorizontalAlignment="Left" Margin="405,6,0,0" VerticalAlignment="Top" Width="275"/>
-            <AppBarButton x:Name="BrowserForwardBtn" HorizontalAlignment="Left" Icon="Forward" Label="Forward" Margin="696,125,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="BrowserBackBtn" HorizontalAlignment="Left" Icon="Back" Label="Back" Margin="697,209,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
-            <AppBarButton x:Name="BrowserCloseBtn" HorizontalAlignment="Left" Icon="HangUp" Label="Close" Margin="700,1,0,0" VerticalAlignment="Top"/>
+        <!-- BROWSER SUB-GRID -->
+        <Grid x:Name="BrowserGrid" HorizontalAlignment="Left" Height="462" Margin="12,6,0,0" VerticalAlignment="Top" Width="776" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF4D0404" Background="#FF322E2E" Visibility="{StaticResource OFF}">
+            <TextBlock x:Name="webAddressTxt" HorizontalAlignment="Left" Margin="13,12,0,0" TextWrapping="Wrap" Text="Browser" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Width="647"/>
+            <WebView x:Name="MyBrowser" HorizontalAlignment="Left" Height="386" Margin="4,66,0,0" VerticalAlignment="Top" Width="763" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="BrowserMenuBtn" HorizontalAlignment="Left" Icon="Bookmarks" Label="Menu" Margin="697,2,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
         </Grid>
-
-
-        <!-- POWER OPTIONS GRID -->
-        <Grid x:Name="PowerOptionsGrid" HorizontalAlignment="Left" Height="100" Margin="500,289,0,0" VerticalAlignment="Top" Width="237" RequestedTheme="Dark" Visibility="{StaticResource OFF}">
-            <AppBarButton x:Name="ShutDownBtn" HorizontalAlignment="Left" Icon="Clear" Label="Shutdown" Margin="38,21,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Background="#E50E1A6B"/>
-            <AppBarButton x:Name="ReBootBtn" HorizontalAlignment="Left" Icon="Refresh" Label="Reboot" Margin="139,21,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Background="#E50E1A6B"/>
+        <!-- BROWSER MENU SUB-GRID-->
+        <Grid x:Name="BrowserMenuGrid" HorizontalAlignment="Left" Height="156" Margin="150,45,0,0" VerticalAlignment="Top" Width="485" RequestedTheme="Dark" BorderBrush="#FFEA0B0B" BorderThickness="3" CornerRadius="12" Background="Black" Visibility="{StaticResource OFF}">
+            <AppBarButton x:Name="BrowserCloseBtn" HorizontalAlignment="Left" Icon="HangUp" Label="Close" Margin="404,8,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="BrowserForwardBtn" HorizontalAlignment="Left" Icon="Forward" Label="Forward" Margin="11,6,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="BrowserBackBtn" HorizontalAlignment="Left" Icon="Back" Label="Back" Margin="88,6,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <ComboBox x:Name="BookmarksComboBox" HorizontalAlignment="Left" Margin="32,103,0,0" VerticalAlignment="Top" Width="415"/>
+            <AppBarButton x:Name="ReloadBrowserPage" HorizontalAlignment="Left" Icon="Refresh" Label="Reload" Margin="161,6,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="CancelBrowserPageLoadBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Cancel" Margin="258,6,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
         </Grid>
-
         <!-- LOCATION GRID -->
         <Grid x:Name="LocationOrientationGrid" HorizontalAlignment="Left" Height="285" Margin="281,101,0,0" VerticalAlignment="Top" Width="494" RequestedTheme="Dark" BorderThickness="4" CornerRadius="12" BorderBrush="#FF0FBB0F" Background="Black" Visibility="Collapsed">
             <Image x:Name="CompassImage" HorizontalAlignment="Left" Height="134" Margin="337,23,0,0" VerticalAlignment="Top" Width="138" RequestedTheme="Dark" Source="Media/compass2.png"/>
         </Grid>
 
         <!-- HOME AUTOMATION GRID -->
-        <Grid x:Name="AutoGrid" HorizontalAlignment="Left" Height="349" Margin="88,55,0,0" VerticalAlignment="Top" Width="700" RequestedTheme="Dark" BorderBrush="#FF036A9B" BorderThickness="4" CornerRadius="12" Background="#CC03233E" Visibility="{StaticResource OFF}">
-            <Slider x:Name="LightLevelAdjust" HorizontalAlignment="Left" Margin="300,31,0,0" VerticalAlignment="Top" Width="39" Orientation="Vertical" Height="209" FontFamily="{StaticResource roboto}"/>
-            <ToggleSwitch x:Name="LivingroomLightSwitch" Header="Livingroom Lights" HorizontalAlignment="Left" Margin="200,263,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Width="128"/>
-            <Slider x:Name="ColourAdjust" HorizontalAlignment="Left" Margin="176,31,0,0" VerticalAlignment="Top" Width="39" Orientation="Vertical" Height="209" FontFamily="{StaticResource roboto}"/>
-            <ToggleSwitch x:Name="AutomationSwitch" Header="Automation &amp; Security" HorizontalAlignment="Left" Margin="14,263,0,0" VerticalAlignment="Top" OnContent="Active"/>
-            <AppBarButton x:Name="SceneLightsBtn" HorizontalAlignment="Left" Label="Lights" Margin="577,23,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark">
-                <AppBarButton.Icon>
-                    <BitmapIcon UriSource="Assets/ic_lightbulb_outline_white_24dp.png"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <ToggleSwitch x:Name="BedroomLightSwitch" Header="Bedroom Lights" HorizontalAlignment="Left" Margin="372,262,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
-            <AppBarButton HorizontalAlignment="Left" Label="Fan" Margin="576,112,0,0" VerticalAlignment="Top" Icon="Home"/>
-            <Slider HorizontalAlignment="Left" Margin="430,33,0,0" VerticalAlignment="Top" Orientation="Vertical" Height="208"/>
+        <Grid x:Name="AutoGrid" HorizontalAlignment="Left" Height="399" Margin="83,60,0,0" VerticalAlignment="Top" Width="700" RequestedTheme="Dark" BorderBrush="#FF036A9B" BorderThickness="4" CornerRadius="12" Background="#E5010E19" Visibility="Collapsed">
+            <TextBlock x:Name="HomeAutoTitleTxt" HorizontalAlignment="Left" Margin="14,11,0,0" TextWrapping="Wrap" Text="Home Automation &amp; Controls" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="Fonts/Roboto-Regular.ttf#Roboto" FontSize="18"/>
+            <AppBarButton x:Name="HomeAutoCloseBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="613,11,0,0" VerticalAlignment="Top" Height="74"/>
+            <ComboBox x:Name="AllScenesCB" HorizontalAlignment="Left" Margin="13,111,0,0" VerticalAlignment="Top" Width="188"/>
+            <TextBlock x:Name="SceneTitleTxt" HorizontalAlignment="Left" Margin="27,87,0,0" TextWrapping="Wrap" Text="Available Scenes" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <ComboBox x:Name="AllHADevices" HorizontalAlignment="Left" Margin="334,111,0,0" VerticalAlignment="Top" Width="226"/>
+            <TextBlock x:Name="DevicesTitleTxt" HorizontalAlignment="Left" Margin="350,87,0,0" TextWrapping="Wrap" Text="All Devices" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="ScanDevicesBtn" HorizontalAlignment="Left" Icon="Refresh" Label="Scan" Margin="487,11,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="AddSceneBtn" HorizontalAlignment="Left" Icon="Favorite" Label="New Scene" Margin="13,160,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Height="70"/>
+            <AppBarButton x:Name="DeleteSceneBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Delete Scene" Margin="120,160,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Width="68" Height="70"/>
+            <ToggleSwitch x:Name="HueEmulationSw" Header="Philips HUE Bridge " HorizontalAlignment="Left" Margin="509,315,0,0" VerticalAlignment="Top" RequestedTheme="Dark" OnContent="Emulating" FontFamily="Fonts/Roboto-Regular.ttf#Roboto" BorderThickness="5,0,10,0" BorderBrush="#FFEE0ACF"/>
+            <ToggleSwitch Header="DMX" HorizontalAlignment="Left" Margin="302,315,0,0" VerticalAlignment="Top" FontFamily="Fonts/Roboto-Regular.ttf#Roboto" BorderBrush="#FFF34B4B" BorderThickness="5,0,10,0" RequestedTheme="Dark"/>
         </Grid>
 
         <!-- ADMINISTRATION GRID -->
-        <Grid x:Name="AdminGrid" HorizontalAlignment="Left" Height="395" Margin="104,42,0,0" VerticalAlignment="Top" Width="605" RequestedTheme="Dark" BorderBrush="#FF0FDA0F" BorderThickness="3" CornerRadius="8" Background="Black" Visibility="{StaticResource OFF}">
-            <AppBarButton x:Name="AdminOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="511,13,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+        <Grid x:Name="AdminGrid" HorizontalAlignment="Left" Height="423" Margin="30,28,0,0" VerticalAlignment="Top" Width="742" RequestedTheme="Dark" BorderBrush="#FF0FDA0F" BorderThickness="3" CornerRadius="8" Background="Black" Visibility="Collapsed">
+            <AppBarButton x:Name="AdminOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="650,13,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="LoginBtn" HorizontalAlignment="Left" Icon="Permissions" Label="Login" Margin="643,323,0,0" VerticalAlignment="Top" Height="74" Width="80" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+
+            <StackPanel HorizontalAlignment="Left" Height="257" Margin="33,31,0,0" VerticalAlignment="Top" Width="393">
+                <PersonPicture x:Name="AdminPicture"
+                               
+                               ProfilePicture="Assets\Nash14-2.JPG"
+                               DisplayName="Nash Ali"
+                               Initials="ZNA"
+                               HorizontalAlignment="Left" 
+                               Margin="24,27,0,0" 
+                               VerticalAlignment="Top" 
+                               RequestedTheme="Dark" 
+                               FontFamily="{StaticResource roboto}" Height="165" Width="135"/>
+                <TextBlock x:Name="ResidentAdminNameTxt" FontFamily="{StaticResource roboto}" Text="Nash Ali" HorizontalAlignment="Right" VerticalAlignment="Top" Width="195">
+
+                </TextBlock>
+                <TextBlock x:Name ="ResidentAdminEmail" FontFamily="{StaticResource roboto}" Text="nash4unow@hotmail.com">
+
+                </TextBlock>
+            </StackPanel>
+
+            <AppBarButton x:Name="AdminLockBtn" HorizontalAlignment="Left" Label="LOCK" Margin="15,323,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}">
+                <AppBarButton.Icon>
+                    <BitmapIcon UriSource="Glyphs/ic_security_white_24dp.png"/>
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <ToggleSwitch x:Name="PIRSensorMode" Header="PIR Motion Sensor" HorizontalAlignment="Left" Margin="452,336,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" BorderThickness="5,0,10,0" BorderBrush="#FFF71111" IsOn="True"/>
         </Grid>
 
         <!-- INSTALLED APPS GRID -->
@@ -281,7 +353,7 @@
         <Grid x:Name="WeatherGrid" HorizontalAlignment="Left" Height="432" Margin="229,20,0,0" VerticalAlignment="Top" Width="319" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF36EE23" Background="#7F000000" Visibility="{StaticResource OFF}"/>
 
         <!-- PICTURE GRID -->
-        <Grid x:Name="PictureGrid" HorizontalAlignment="Left" Height="453" Margin="17,22,0,0" VerticalAlignment="Top" Width="742" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF1EE60A" Background="Black" Visibility="{StaticResource OFF}">
+        <Grid x:Name="PictureGrid" HorizontalAlignment="Left" Height="453" Margin="17,22,0,0" VerticalAlignment="Top" Width="742" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF1EE60A" Background="Black" Visibility="Collapsed">
             <Image x:Name="previewImage" HorizontalAlignment="Left" Height="328" Margin="18,33,0,0" VerticalAlignment="Top" Width="456" RequestedTheme="Dark" Stretch="UniformToFill"/>
             <ListView x:Name="lstFiles" HorizontalAlignment="Left" Height="361" Margin="493,13,0,0" VerticalAlignment="Top" Width="223" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
             <TextBlock x:Name="lblBreadcrumb" HorizontalAlignment="Left" Margin="517,414,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="198" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
@@ -291,14 +363,10 @@
         </Grid>
 
         <!-- TIME PICKER GRID -->
-        <Grid x:Name="TimePickerGrid" HorizontalAlignment="Left" Height="150" Margin="320,180,0,0" VerticalAlignment="Top" Width="350" Visibility="{StaticResource OFF}" RequestedTheme="Dark" BorderBrush="#FFF50707" Background="#FF338D8D" BorderThickness="3" CornerRadius="6">
+        <Grid x:Name="TimePickerGrid" HorizontalAlignment="Left" Height="150" Margin="320,180,0,0" VerticalAlignment="Top" Width="350" Visibility="Collapsed" RequestedTheme="Dark" BorderBrush="#FFF50707" Background="#FF338D8D" BorderThickness="3" CornerRadius="6">
             <TimePicker x:Name="AlarmTimePicker" HorizontalAlignment="Left" Margin="38,25,0,0" VerticalAlignment="Top" Width="257" RequestedTheme="Dark"/>
             <AppBarButton x:Name="SetAlarmTimeBtn" HorizontalAlignment="Left" Icon="Clock" Label="OK" Margin="257,71,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
             <AppBarButton x:Name="CancelAlarmTimeBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Cancel" Margin="12,70,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
-        </Grid>
-        <!-- CONFGURE GRID -->
-        <Grid x:Name="ConfigureGrid" HorizontalAlignment="Left" Height="375" Margin="180,75,0,0" VerticalAlignment="Top" Width="535" RequestedTheme="Dark" BorderBrush="#FFE81010" BorderThickness="3" CornerRadius="12" Background="#BF033434" Visibility="{StaticResource OFF}">
-            <AppBarButton x:Name="CloseConfigureBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="442,18,0,0" VerticalAlignment="Top"/>
         </Grid>
 
         <!-- GUEST MGMT MENU -->
@@ -306,13 +374,57 @@
             <AppBarButton x:Name="CloseGuestMenuBtn" HorizontalAlignment="Left" Icon="ClearSelection" Label="Close" Margin="442,9,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
             <AppBarButton x:Name="AddNewGuestBtn" HorizontalAlignment="Left" Icon="AddFriend" Label="Add Guest" Margin="13,12,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Height="83" FontFamily="{StaticResource roboto}"/>
             <AppBarButton x:Name="RemoveGuestBtn" HorizontalAlignment="Left" Icon="Dislike" Label="Remove Guest" Margin="10,123,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <PersonPicture x:Name="GuestPicture" HorizontalAlignment="Left" Height="151" Margin="362,101,0,0" VerticalAlignment="Top" Width="150"/>
         </Grid>
-        <!-- -->
-        <!-- -->
+
+        <!-- PASSWORD SUB-GRID  -->
+        <Grid x:Name="PasswordGrid" HorizontalAlignment="Left" Height="191" Margin="149,13,0,0" VerticalAlignment="Top" Width="508" RequestedTheme="Dark" BorderThickness="3" CornerRadius="12" BorderBrush="#FF09CB9F" Background="Black" Visibility="Collapsed">
+            <PasswordBox x:Name="UserPassword" HorizontalAlignment="Left" Margin="25,118,0,0" VerticalAlignment="Top" Width="223" PlaceholderText="enter password" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="OKPassBtn" HorizontalAlignment="Left" Icon="Accept" Label="OK" Margin="412,110,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Height="70"/>
+            <AppBarButton x:Name="CancelPassBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Cancel" Margin="306,110,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Height="70"/>
+            <TextBlock x:Name="PasswordTitleTxt" HorizontalAlignment="Left" Margin="136,7,0,0" TextWrapping="Wrap" Text="Enter username and password" VerticalAlignment="Top" FontSize="18"/>
+            <TextBox x:Name="UsernameTxt" HorizontalAlignment="Left" Margin="26,50,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="308" RequestedTheme="Dark" PlaceholderText="enter username"/>
+        </Grid>
+        <!-- NETWORK LOGIN SUB-GRID  -->
+        <Grid x:Name="NetworkLoginGrid" HorizontalAlignment="Left" Height="288" Margin="102,90,0,0" VerticalAlignment="Top" Width="614" BorderBrush="#FF8E08AC" RequestedTheme="Dark" BorderThickness="3" CornerRadius="16" Background="#BA001213" Visibility="Collapsed">
+            <TextBlock HorizontalAlignment="Left" Margin="8,8,0,0" TextWrapping="Wrap" Text="Network Login" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <PasswordBox x:Name="NetworkPassword" HorizontalAlignment="Left" Margin="90,101,0,0" VerticalAlignment="Top" Width="240" FontFamily="{StaticResource roboto}" Height="32" RequestedTheme="Dark" PlaceholderText="enter password"/>
+            <TextBox x:Name="NetworkUser" HorizontalAlignment="Left" Margin="49,49,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="329" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" PlaceholderText="enter username (email)"/>
+            <AppBarButton x:Name="NetworkLoginBtn" HorizontalAlignment="Left" Icon="Account" Label="LOGIN" Margin="522,208,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="NetworkLoginCancelBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Cancel" Margin="425,208,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="NetworkLoginStatusTxt" HorizontalAlignment="Left" Margin="130,230,0,0" TextWrapping="Wrap" Text="waiting..." VerticalAlignment="Top" Width="173" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <PersonPicture x:Name="UserPicture" HorizontalAlignment="Left" Height="189" Margin="443,15,0,0" VerticalAlignment="Top" Width="149"/>
+        </Grid>
+
+        <!-- SENSORS SUB GRID -->
+        <Grid x:Name="SensorsGrid" HorizontalAlignment="Left" Height="316" Margin="164,130,0,0" VerticalAlignment="Top" Width="532" BorderBrush="#FFE01212" Background="Black" RequestedTheme="Dark" BorderThickness="3" CornerRadius="16" Visibility="Collapsed">
+            <TextBlock HorizontalAlignment="Left" Margin="9,8,0,0" TextWrapping="Wrap" Text="Sensors" VerticalAlignment="Top" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="ScanSensorsBtn" HorizontalAlignment="Left" Icon="Scan" Label="Scan" Margin="440,220,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="CloseSensorsBtn" HorizontalAlignment="Left" Icon="Like" Label="Close" Margin="440,17,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="contentsTxt" HorizontalAlignment="Left" Margin="20,62,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="332" Height="162"/>
+            <TextBlock x:Name="infoTxt" HorizontalAlignment="Left" Margin="33,280,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="269"/>
+        </Grid>
+
 
         <!-- -->
         <!-- -->
+
+        <!-- USER DIALOGUE -->
+        <Grid x:Name="GetUserTextDialogueGrid" HorizontalAlignment="Left" Height="191" Margin="144,20,0,0" VerticalAlignment="Top" Width="494" RequestedTheme="Dark" Background="Black" BorderBrush="#FF33F308" BorderThickness="3" CornerRadius="12" Visibility="Collapsed">
+            <AppBarButton x:Name="UserDialogueCancelBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Cancel" Margin="306,120,0,0" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <AppBarButton x:Name="UserTextOKBtn" HorizontalAlignment="Left" Icon="Accept" Label="OK" Margin="403,120,0,0" VerticalAlignment="Top" RequestedTheme="Dark" Height="62" Click="UserTextOKBtn_Click"/>
+            <TextBox x:Name="UserTextInput" HorizontalAlignment="Left" Margin="49,61,0,0" Text="" VerticalAlignment="Top" Width="390" RequestedTheme="Dark" PlaceholderText="user input" FontFamily="{StaticResource roboto}" InputScope="Text"/>
+            <TextBlock x:Name="UserMessage" HorizontalAlignment="Left" Margin="56,22,0,0" TextWrapping="Wrap" Text="Please enter text" VerticalAlignment="Top" Width="382" FontSize="18" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+        </Grid>
+        <!-- STATUS GRID -->
+        <Grid x:Name="StatusGrid" BorderBrush="#FFE81010" BorderThickness="3" Background="Black" CornerRadius="12" HorizontalAlignment="Left" Height="100" Margin="161,155,0,0" RequestedTheme="Dark" VerticalAlignment="Top" Width="464" Visibility="{StaticResource OFF}" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <TextBlock x:Name="GeneralStatusTxt" HorizontalAlignment="Left" Margin="11,36,0,0" TextWrapping="Wrap" Text="status - waiting" VerticalAlignment="Top" Width="440" FontFamily="{StaticResource roboto}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
+            <Button x:Name="StatusOKBtn" Content="GOT IT!" HorizontalAlignment="Left" Margin="303,61,0,0" VerticalAlignment="Top" Width="147" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Height="28"/>
+            <TextBlock x:Name="StatusTitleTxt" HorizontalAlignment="Left" Margin="7,4,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontSize="18"/>
+        </Grid>
+
+        <Ellipse x:Name="MotionDetectedInd" HorizontalAlignment="Left" Height="29" Margin="4,5,0,0" VerticalAlignment="Top" Width="28" RequestedTheme="Dark" Fill="#FFF10909" Visibility="Collapsed"/>
+
+
     </Grid>
-    <!--Main Grid end -->
-
 </Page>
