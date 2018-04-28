@@ -25,6 +25,7 @@
   <Capabilities>
     <Capability Name="internetClient" />
     <Capability Name="codeGeneration" />
+    <Capability Name="internetClientServer" />
     <uap3:Capability Name="backgroundMediaPlayback" />
     <iot:Capability Name="systemManagement" />
     <iot:Capability Name="lowLevelDevices" />
@@ -34,9 +35,10 @@
     <uap:Capability Name="removableStorage" />
     <uap:Capability Name="userAccountInformation" />
     <DeviceCapability Name="location" />
-    <DeviceCapability Name="wifiControl" />
     <DeviceCapability Name="microphone" />
     <DeviceCapability Name="bluetooth" />
+    <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="wifiControl" />
     <DeviceCapability Name="serialcommunication">
       <Device Id="any">
         <Function Type="name:serialPort" />

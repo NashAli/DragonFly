@@ -34,6 +34,9 @@ Imports Windows.UI.Popups
 Imports Windows.Devices.SerialCommunication
 Imports System.Threading
 Imports Windows.Graphics.Imaging
+Imports Windows.Media.Capture
+Imports Windows.System.Display
+Imports Windows.Media.MediaProperties
 
 Public NotInheritable Class MainPage
     Inherits Page
@@ -89,7 +92,9 @@ Public NotInheritable Class MainPage
 
 
     '   ******  It All Starts Here  *********
-
+    Private Sub App_Closing() Handles Me.Unloaded
+        captureManager.Dispose()
+    End Sub
     Private Sub MainPage_Ready() Handles Me.Loaded
 
         InitDragonfly()
@@ -98,13 +103,12 @@ Public NotInheritable Class MainPage
     End Sub
     '   init dragonfly
     Private Sub InitDragonfly()
+        InitializeSerialPort()
+        Init_MOTION()
         SetQueryOptions()
         Dim eas As New EasClientDeviceInformation()
         MainTitleTxt.Text = "DragonFly: " + eas.SystemProductName
         StartClockTimers()
-        InitializeSerialPort()
-        Init_MOTION()
-
         HideAllGrids()
         RestoreMain()
         LoadBookmarks()
@@ -139,6 +143,151 @@ Public NotInheritable Class MainPage
 
         End Try
     End Sub
+
+
+    '   *************************************************************************************
+    '   VISION & ROBOT SYSTEM 
+    Dim ONE_SEC As Integer = 0
+    Private photoFile As StorageFile
+    Private recordStorageFile As StorageFile
+    Dim ROBOT18_AUTO As Boolean = False
+    Dim MOTORXPOS As Integer = 0
+    Dim MOTORYPOS As Integer = 0
+    Dim MOTORZPOS As Integer = 0
+    Dim captureManager As MediaCapture = New MediaCapture()
+    Private ReadOnly displayRequest As DisplayRequest = New DisplayRequest()
+    Private isVideoInitialized As Boolean = False
+    Private isVideoPreviewing As Boolean = False
+    Private isVideoRecording As Boolean = False
+
+    '   start preview
+    Private Async Sub Start_Preview()
+        '   show data and preview window
+        VisionGrid.Visibility = Visibility.Visible
+        If Not isVideoInitialized Then
+            Init_Camera()
+        End If
+        Try
+            '   start the preview
+            capturePreview.Source = captureManager
+            Await captureManager.StartPreviewAsync()
+            isVideoPreviewing = True
+            ShowStatus("CAMERA:", "Preview Starting...")
+        Catch ex As Exception
+            isVideoPreviewing = False
+            ShowStatus("CAMERA:", "Preview Error - Camera not initialized!")
+        End Try
+    End Sub
+    '   stop preview
+    Private Async Sub Stop_Preview()
+        If isVideoPreviewing Then
+            Try
+                '   stop the preview
+                Await captureManager.StopPreviewAsync()
+                '   hide the vision and data window
+                VisionGrid.Visibility = Visibility.Collapsed
+                ShowStatus("CAMERA:", "Preview Stopped...")
+                isVideoPreviewing = False
+            Catch ex As Exception
+                ShowStatus("CAMERA:", "Preview Stop Fail!")
+            End Try
+        End If
+    End Sub
+
+
+    Private Sub ActivateVision_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles ActivateVisionBtn.Click
+        RobotGrid.Visibility = Visibility.Collapsed
+        Open_Camera()
+    End Sub
+
+    Private Sub Robot_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles RobotBtn.Click
+        HideAllGrids()
+        RobotGrid.Visibility = Visibility.Visible
+    End Sub
+    Private Sub Init_Robot()
+        X_MotorTxt.Text = "X Motor: no value"
+        Y_MotorTxt.Text = "Y Motor: no value"
+        Z_MotorTxt.Text = "Z Motor: no value"
+    End Sub
+    Private Sub StartRobot_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles RobotStartBtn.Click
+        Init_Robot()
+        RobotMotorGrid.Visibility = Visibility.Visible
+        ShowStatus("ROBOT:", "Robot has Started")
+    End Sub
+    Private Sub EmStopRobot_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles RobotEStopBtn.Click
+        RobotMotorGrid.Visibility = Visibility.Collapsed
+        ShowStatus("ROBOT:", "Robot has Stopped")
+    End Sub
+
+
+    '   close camera
+    Private Sub Close_Camera()
+        captureManager.Dispose()
+        isVideoInitialized = False
+        VisionGrid.Visibility = Visibility.Collapsed
+    End Sub
+    '   open camera
+    Private Sub Open_Camera()
+        If Not isVideoInitialized Then
+            Init_Camera()
+        End If
+        Start_Preview()
+    End Sub
+
+    Private Function GenerateNewFileName(ByVal Optional prefix As String = "IMG") As String
+        Return prefix & "_" + DateTime.UtcNow.ToString("yyyy-MMM-dd_HH-mm-ss")
+    End Function
+
+    '   Initialize the camera
+    Private Async Sub Init_Camera()
+        Try
+            ' Get available devices for capturing pictures
+            Dim allVideoDevices = Await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture)
+            Dim desiredDevice As DeviceInformation = allVideoDevices.FirstOrDefault
+            Dim settings As New MediaCaptureInitializationSettings() With
+                {.SharingMode = MediaCaptureSharingMode.ExclusiveControl,
+                .MemoryPreference = MediaCaptureMemoryPreference.Auto,
+                .StreamingCaptureMode = StreamingCaptureMode.Video}
+            Await captureManager.InitializeAsync(settings)
+            isVideoInitialized = True
+            ShowStatus("CAMERA:", "Camera Init. OK!")
+        Catch ex As Exception
+            isVideoInitialized = False
+            ShowStatus("CAMERA:", "Camera Init. Fail!")
+        End Try
+    End Sub
+
+    Private Sub Close_Vision(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles CloseCameraABB.Click
+        Stop_Preview()
+        VisionGrid.Visibility = Visibility.Collapsed
+    End Sub
+
+    Private Sub ImageCapture_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles CaptureImageABB.Click
+        Capture_PhotoAsync()
+    End Sub
+    Private Sub VideoCapture_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles CaptureClipABB.Click
+        Capture_Clip()
+    End Sub
+    Private Async Sub Capture_PhotoAsync()
+        '       grab a photo image.
+        Await captureManager.CapturePhotoToStorageFileAsync(ImageEncodingProperties.CreateJpeg(), photoFile)
+        '       save image.
+        photoFile = Await KnownFolders.PicturesLibrary.CreateFileAsync(GenerateNewFileName, CreationCollisionOption.GenerateUniqueName)
+    End Sub
+
+    Private Async Sub Capture_Clip()
+        ONE_SEC = 0
+        Await captureManager.StartRecordToStreamAsync(MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto), recordStorageFile)
+        While ONE_SEC < 10
+            CapTimerTxt.Text = ONE_SEC.ToString
+        End While
+        Await captureManager.StopRecordAsync
+        Await KnownFolders.VideosLibrary.CreateFileAsync(GenerateNewFileName)
+        '       save as a mp4 file.
+    End Sub
+
+
+
 
     '   SYSTEM SOUNDS HANDLER
     Private Sub PlaySound(snd)
@@ -191,6 +340,25 @@ Public NotInheritable Class MainPage
     '   Enters the resident/guest entry/verification system
     '   this uses the UART Fingerprint Reader module.
     '   Some basic support code...
+
+    Dim ReceiveData() As Byte
+    Private serialPort As SerialDevice = Nothing
+    Private MyDataReader As DataReader = Nothing
+    Private DataWriterObject As DataWriter = Nothing
+    Private listOfDevices As ObservableCollection(Of DeviceInformation)
+    Private ReadCancelTokenSource As CancellationTokenSource
+    Dim CommandTransmitDataBuffer(7) As Byte, CommandValue As Byte, User As Integer, Query As Boolean
+    Dim StatusReceiveDataBuffer(7) As Byte
+    Private Const prepostamble As Byte = &HF5
+    Private Const zero As Byte = &H0
+    Private Const one As Byte = &H1
+    Public EigenVal = 197
+
+    Private Sub FingerprintBtn_Click(sender As Object, e As RoutedEventArgs) Handles FingerprintBtn.Click
+        HideAllGrids()
+        FingerprintGrid.Visibility = Visibility.Visible
+        CheckTotalUsers()
+    End Sub
 
 
     Enum FingerPrintResponse
@@ -313,19 +481,6 @@ Public NotInheritable Class MainPage
         Return returnMessage
     End Function
 
-    Dim ReceiveData() As Byte
-    Private serialPort As SerialDevice = Nothing
-    Private DataReaderObject As DataReader = Nothing
-    Private DataWriterObject As DataWriter = Nothing
-    Private listOfDevices As ObservableCollection(Of DeviceInformation)
-    Private ReadCancelTokenSource As CancellationTokenSource
-    Dim CommandTransmitDataBuffer(7) As Byte, CommandValue As Byte, User As Integer, Query As Boolean
-    Dim StatusReceiveDataBuffer(7) As Byte
-    Private Const prepostamble As Byte = &HF5
-    Private Const zero As Byte = &H0
-    Private Const one As Byte = &H1
-    Public EigenVal = 197
-
 
 
 
@@ -432,12 +587,12 @@ Public NotInheritable Class MainPage
             Dim dis = Await DeviceInformation.FindAllAsync(aqs)
             serialPort = Await SerialDevice.FromIdAsync(dis(0).Id)
             serialPort.WriteTimeout = TimeSpan.FromMilliseconds(2000)
-            serialPort.ReadTimeout = TimeSpan.FromMilliseconds(2000)
+            serialPort.ReadTimeout = TimeSpan.FromMilliseconds(4000)
             serialPort.BaudRate = 19200
             serialPort.Parity = SerialParity.None
             serialPort.StopBits = SerialStopBitCount.One
             serialPort.DataBits = 8
-            DataReaderObject = New DataReader(serialPort.InputStream) With {
+            MyDataReader = New DataReader(serialPort.InputStream) With {
                 .InputStreamOptions = InputStreamOptions.[Partial]
             }
             DataWriterObject = New DataWriter(serialPort.OutputStream)
@@ -461,6 +616,7 @@ Public NotInheritable Class MainPage
     End Sub
     'LISTEN FOR NEXT RECEIVE
     Private Async Function Listen() As Task
+        RecStatusTxt.Text = "waiting ..."
         RESPONSE = 8
         PAYLOAD = 0
         Dim count = RESPONSE + PAYLOAD
@@ -468,33 +624,35 @@ Public NotInheritable Class MainPage
         Try
             If serialPort IsNot Nothing Then
                 While True
-                    bytesRead = Await DataReaderObject.LoadAsync(count).AsTask()
+                    bytesRead = Await MyDataReader.LoadAsync(count).AsTask()
                     'Wait until buffer is full
                     If (ReadCancelTokenSource.Token.IsCancellationRequested) OrElse (serialPort Is Nothing) Then
                         Exit While
                     End If
-                    BytesReadTxt.Text = "BYTES READ: " + bytesRead.ToString
+
                     If bytesRead > 0 And bytesRead < 9 Then
-                        RecStatusTxt.Text = "received status"
+                        BytesReadTxt.Text = "BYTES READ: " + bytesRead.ToString
+                        RecStatusTxt.Text = "received status..."
                         ModuleStatusTxt.Text = ""
                         For x = 0 To 6
-                            StatusReceiveDataBuffer(x) = DataReaderObject.ReadByte()
+                            StatusReceiveDataBuffer(x) = MyDataReader.ReadByte()
                             ModuleStatusTxt.Text = ModuleStatusTxt.Text + ByteToHexString(StatusReceiveDataBuffer(x)) + " - "
                         Next
                         ModuleStatusTxt.Text = ModuleStatusTxt.Text + ByteToHexString(StatusReceiveDataBuffer(7))
                         PAYLOAD = (StatusReceiveDataBuffer(2) * 256) + StatusReceiveDataBuffer(3)
                         ReceiveData = New Byte(PAYLOAD - 1) {}
-                        DataReaderObject.ReadBytes(ReceiveData)
+                        MyDataReader.ReadBytes(ReceiveData)
                         For Each Data As Byte In ReceiveData
                             'foreach (byte Data in ReceiveData)
                             rcvdPayloadTxt.Text = rcvdPayloadTxt.Text + ByteToHexString(Data) + " - "
                         Next
                     End If
                     If bytesRead > 8 Then
+                        BytesReadTxt.Text = "BYTES READ: " + bytesRead.ToString
                         RecStatusTxt.Text = "received payload"
                         ModuleStatusTxt.Text = ""
                         For x = 0 To 6
-                            StatusReceiveDataBuffer(x) = DataReaderObject.ReadByte()
+                            StatusReceiveDataBuffer(x) = MyDataReader.ReadByte()
                             ModuleStatusTxt.Text = ModuleStatusTxt.Text + ByteToHexString(StatusReceiveDataBuffer(x)) + " - "
                         Next
                         ModuleStatusTxt.Text = ModuleStatusTxt.Text + ByteToHexString(StatusReceiveDataBuffer(7))
@@ -514,22 +672,24 @@ Public NotInheritable Class MainPage
         End Try
     End Function
     '********** SEND BYTES **********
+    '
+    '
     Public Async Sub SendBytes(TxData As Byte())
         Try
             'Send data to UART
             DataWriterObject.WriteBytes(TxData)
             Await DataWriterObject.StoreAsync()
+            'portStatus.Text = "bytes sent..."
         Catch ex As Exception
             ShowStatus("FPM:", "UART0 Tx Err" + ex.ToString)
         End Try
     End Sub
 
     '   Get total count of the number of users in the module
-    Private Async Sub CheckTotalUsers()
+    Private Sub CheckTotalUsers()
         AssembleCommand(FingerPrintCommand.CMD_GET_USER_SUM_DB, 0, 0)
         SendBytes(CommandTransmitDataBuffer)
-        PAYLOAD = 0
-        Await Listen()
+        StartReceive()
         If StatusReceiveDataBuffer(FingerPrintResponse.Success) Then
             TotalUsers = ((StatusReceiveDataBuffer(3) * 256) + StatusReceiveDataBuffer(4))
             TotalUsersTxt.Text = "Total UsersDB : " + TotalUsers.ToString
@@ -571,62 +731,55 @@ Public NotInheritable Class MainPage
         End While
     End Sub
     '   Aquire Fingerprint
-    Private Async Sub RequestPrint()
+    Private Sub RequestPrint()
         Try
             PAYLOAD = 9176
             CommandTransmitDataBuffer(5) = Security
             AssembleCommand(FingerPrintCommand.CMD_GET_IMAGE, USERID, 0)
             SendBytes(CommandTransmitDataBuffer)
-            Await Listen()
+            StartReceive()
+            'Await Listen()
         Catch ex As Exception
 
         End Try
     End Sub
     '   Verify FingerPrint
-    Private Async Sub VerifyPrint()
+    Private Sub VerifyPrint()
         portStatus.Text = "Verify print..."
         Try
             CommandTransmitDataBuffer(5) = Security
             AssembleCommand(FingerPrintCommand.CMD_FROM_VERIFY, USERID, 0)
             SendBytes(CommandTransmitDataBuffer)
-            Await Listen()
+            StartReceive()
         Catch ex As Exception
 
         End Try
     End Sub
     '   Delete Module database
-    Private Async Sub DeleteModuleDatabase()
+    Private Sub DeleteModuleDatabase()
         portStatus.Text = "Deleting DB..."
         Try
             CommandTransmitDataBuffer(5) = Security
             AssembleCommand(FingerPrintCommand.CMD_REG_ALLDEL_DB, USERID, 0)
             SendBytes(CommandTransmitDataBuffer)
-            Await Listen()
+            StartReceive()
         Catch ex As Exception
 
         End Try
     End Sub
     '   Get module status
-    Private Async Sub GetModuleStatus()
+    Private Sub GetModuleStatus()
         portStatus.Text = "Getting status..."
         Try
             CommandTransmitDataBuffer(5) = Security
             AssembleCommand(FingerPrintCommand.CMD_IDENTIFY_DB, USERID, 0)
             SendBytes(CommandTransmitDataBuffer)
-            Await Listen()
+            StartReceive()
         Catch ex As Exception
 
         End Try
     End Sub
 
-
-    '   All Fingerprint Button handlers
-    '   show the fp grid
-    Private Sub FingerBtn_Click(sender As Object, e As RoutedEventArgs) Handles FingerBtn.Click
-        HideAllGrids()
-        FingerprintGrid.Visibility = Visibility.Visible
-        CheckTotalUsers()
-    End Sub
     '   hide the fp grid
     Private Sub CloseFingerModBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseFingerModBtn.Click
         FingerprintGrid.Visibility = Visibility.Collapsed
@@ -640,7 +793,7 @@ Public NotInheritable Class MainPage
     Private Sub CloseFCGridBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseFCGridBtn.Click
         FingerprintCommandGrid.Visibility = Visibility.Collapsed
     End Sub
-
+    '   
     Private Sub AddPrintBtn_Click(sender As Object, e As RoutedEventArgs) Handles AddPrintBtn.Click
         FingerprintCommandGrid.Visibility = Visibility.Collapsed
         AddNewPrint()
@@ -658,9 +811,6 @@ Public NotInheritable Class MainPage
         '   TODO add an "are you sure!!" here...
         DeleteModuleDatabase()
     End Sub
-
-
-
 
 
 
@@ -937,7 +1087,6 @@ Public NotInheritable Class MainPage
     Private Sub AutomationBtn_Click(sender As Object, ByVal args As RoutedEventArgs) Handles AutomationBtn.Click
         HideAllGrids()
         GetAllScenes()
-        Talker(Zira, "The local automation system is offline")
         AutoGrid.Visibility = Visibility.Visible
     End Sub
     '   Show the Clock grid
@@ -976,6 +1125,8 @@ Public NotInheritable Class MainPage
         WeatherGrid.Visibility = Visibility.Visible
         Talker(Zira, "Weather is always sunny")
     End Sub
+
+
     '   tool 2 menu
     Private Sub MoreToolsBtn_Click(sender As Object, e As RoutedEventArgs) Handles MoreToolsBtn.Click
         ToolsMenuGrid.Visibility = Visibility.Collapsed
@@ -1007,7 +1158,10 @@ Public NotInheritable Class MainPage
         HideAllGrids()
         RestoreMain()
     End Sub
-
+    '   **************************************
+    '   ALL THE WIFI SUPPORT HERE
+    '   TODO: CONNECT TO HOME AUTOMATION WIFI LINKS IF AVAILABLE
+    '   
     '   wifi access connect grid
     Private Sub WifiAccessBtn_Click(ByVal sender As Object, e As RoutedEventArgs) Handles WifiAccessBtn.Click
         ShowAvailableWifiNetworks()
@@ -1146,12 +1300,12 @@ Public NotInheritable Class MainPage
     Public Property I2cCompass As I2cDevice                 ' GY-271 COMPASS
     Public Property I2cMicroChip As I2cDevice               ' support chip for LYNX serial GPS - still deciding! 
     Public Property I2cAltimeter As I2cDevice               ' &H60 - MPL3115-A2 &H60
-    Public Property I2cIRTempProde As I2cDevice             '   MLX90614 IR Infrared Body Temperature Sensor
+    Public Property I2cIRTempProde As I2cDevice             ' MLX90614 IR Infrared Body Temperature Sensor
     Public Property IoController As GpioController
     Public Property NrfCEPin As GpioPin
-    Public Property MODETECT As GpioPin
+    Public Property MODETECT As GpioPin                     ' PIR Motion Detector
     Public Property Nrf As SpiDevice
-    Private Const MoPin As Integer = 4                  ' GPIO4
+    Private Const MoPin As Integer = 4                      ' GPIO4 PIR sensor
     Private Const I2C_CONTROLLER_NAME As String = "I2C1"
     Private Const SPI_CONTROLLER_NAME As String = "SPI0"
     Private Const SPI_CHIP_SELECT_LINE As Integer = 0    ' Line 0 maps To physical pin number 24 On the RPi2 Or RPi3 CE0 - GPIO8
@@ -1522,7 +1676,7 @@ Public NotInheritable Class MainPage
     Public Property MyYPos As Integer
     Public Property MyZPos As Integer
 
-
+    '   STATUS MANAGER  *********************
     '   Show status....
     Private Sub ShowStatus(title As String, stat As String)
         GeneralStatusTxt.Text = stat
@@ -1537,8 +1691,8 @@ Public NotInheritable Class MainPage
     End Sub
 
 
-
-
+    '   CLOCKS AND TIMERS   ***************************************
+    '
     '   init clocks and timers
     Private Sub StartClockTimers()
         'Create Timer
@@ -1551,17 +1705,17 @@ Public NotInheritable Class MainPage
         AddHandler milli_tmr.Tick, AddressOf Quick_Tick
         milli_tmr.Interval = TimeSpan.FromMilliseconds(100)
         milli_tmr.Start()
-        'Start a 5 millisec count
-        Dim five_milli_tmr As DispatcherTimer = New DispatcherTimer()
-        AddHandler five_milli_tmr.Tick, AddressOf FiveMilliSecTimer_Tick
-        five_milli_tmr.Interval = TimeSpan.FromMilliseconds(2)
-        five_milli_tmr.Start()
+        'Start a 2 millisec count
+        Dim two_milli_tmr As DispatcherTimer = New DispatcherTimer()
+        AddHandler two_milli_tmr.Tick, AddressOf TwoMilliSecTimer_Tick
+        two_milli_tmr.Interval = TimeSpan.FromMilliseconds(2)
+        two_milli_tmr.Start()
     End Sub
-    '   timers
-    Private Sub FiveMilliSecTimer_Tick(sender As Object, e As Object)
+    '   timers  two millisec
+    Private Sub TwoMilliSecTimer_Tick(sender As Object, e As Object)
         UpdateDragonfly()
     End Sub
-    '   timers
+    '   timers  100 millisecond count
     Private Sub Quick_Tick(sender As Object, e As Object)
         If LocationOrientationGrid.Visibility = Visibility.Visible Then
             ReadCompass()
@@ -1574,6 +1728,7 @@ Public NotInheritable Class MainPage
     End Sub
     '   timers
     Private Sub OneSecTimer_Tick(ByVal sender As DispatcherTimer, args As Object)
+        ONE_SEC = ONE_SEC + 1
         MotionDetected_Alert()
         If ClockGrid.Visibility = Visibility.Visible Then
             'currentTimeHourTxt.Text = Date.Now.ToString("hh:mm:ss tt zzz")
@@ -1601,6 +1756,9 @@ Public NotInheritable Class MainPage
     End Sub
     '   HIDE ALL GRIDS...
     Private Sub HideAllGrids()
+        RobotMotorGrid.Visibility = Visibility.Collapsed
+        RobotGrid.Visibility = Visibility.Collapsed
+        VisionGrid.Visibility = Visibility.Collapsed
         PictureGrid.Visibility = Visibility.Collapsed
         ClockGrid.Visibility = Visibility.Collapsed
         DateGrid.Visibility = Visibility.Collapsed
@@ -1749,17 +1907,19 @@ Public NotInheritable Class MainPage
         MySpeaker.Voice = voice
     End Sub
     Private Async Sub Talker(voice, message)
-        Try
-            If (Not isTalking) Then
-                isTalking = True
-                MySpeaker.Voice = SpeechSynthesizer.AllVoices.FirstOrDefault(Function(v) v.DisplayName.Contains(voice))
-                MySpeechStream = Await MySpeaker.SynthesizeTextToStreamAsync(message)
-                MyPlayer.SetSource(MySpeechStream, MySpeechStream.ContentType)
-                isTalking = False
-            End If
-        Catch ex As Exception
-            ShowStatus("Talker fail!", ex.ToString)
-        End Try
+        If Not MuteSpeechToggle.IsOn Then
+            Try
+                If (Not isTalking) Then
+                    isTalking = True
+                    MySpeaker.Voice = SpeechSynthesizer.AllVoices.FirstOrDefault(Function(v) v.DisplayName.Contains(voice))
+                    MySpeechStream = Await MySpeaker.SynthesizeTextToStreamAsync(message)
+                    MyPlayer.SetSource(MySpeechStream, MySpeechStream.ContentType)
+                    isTalking = False
+                End If
+            Catch ex As Exception
+                ShowStatus("Talker fail!", ex.ToString)
+            End Try
+        End If
     End Sub
     '   Close SpeechPlus Grid
     Private Sub CloseSpeechPlusBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseSpeechPlusBtn.Click
@@ -1773,6 +1933,22 @@ Public NotInheritable Class MainPage
         Else
             Start_Listening()
         End If
+    End Sub
+    '   mute speech
+    Private Sub MuteSpeechToggle_Toggled(sender As Object, e As RoutedEventArgs) Handles MuteSpeechToggle.Toggled
+        If MuteSpeechToggle.IsOn Then
+            ContinueSpeaking()
+        ElseIf Not MuteSpeechToggle.IsOn Then
+            StopTalking()
+        End If
+    End Sub
+
+    Private Sub ContinueSpeaking()
+        isTalking = False
+    End Sub
+
+    Private Sub StopTalking()
+        isTalking = True
     End Sub
 
 
@@ -1912,7 +2088,6 @@ Public NotInheritable Class MainPage
     Private Sub AudioManagerOKBtn_Click(sender As Object, e As RoutedEventArgs) Handles AudioManagerOKBtn.Click
         AudioManagerGrid.Visibility = Visibility.Collapsed
     End Sub
-
 
 
 
@@ -2158,6 +2333,7 @@ Public NotInheritable Class MainPage
     Private Sub CloseConfigBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseConfigBtn.Click
         ConfigureGrid.Visibility = Visibility.Collapsed
     End Sub
+
 
 
 
