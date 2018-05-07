@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10" IgnorableNamespaces="uap mp uap3 iot">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10" xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2" IgnorableNamespaces="uap mp uap3 iot uap2">
   <Identity Name="d3cdcad8-e0e1-4cd6-a4d6-57778420d735" Publisher="CN=Nash" Version="1.0.0.1" />
   <mp:PhoneIdentity PhoneProductId="d3cdcad8-e0e1-4cd6-a4d6-57778420d735" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
@@ -26,6 +26,7 @@
     <Capability Name="internetClient" />
     <Capability Name="codeGeneration" />
     <Capability Name="internetClientServer" />
+    <Capability Name="privateNetworkClientServer" />
     <uap3:Capability Name="backgroundMediaPlayback" />
     <iot:Capability Name="systemManagement" />
     <iot:Capability Name="lowLevelDevices" />
@@ -34,6 +35,10 @@
     <uap:Capability Name="videosLibrary" />
     <uap:Capability Name="removableStorage" />
     <uap:Capability Name="userAccountInformation" />
+    <uap2:Capability Name="spatialPerception" />
+    <uap:Capability Name="appointments" />
+    <uap:Capability Name="blockedChatMessages" />
+    <uap:Capability Name="contacts" />
     <DeviceCapability Name="location" />
     <DeviceCapability Name="microphone" />
     <DeviceCapability Name="bluetooth" />

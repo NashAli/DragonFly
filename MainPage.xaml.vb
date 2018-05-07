@@ -1,4 +1,69 @@
-﻿Imports System.Net
+﻿'   Copyright(c) Nash Ali/ETMS/NAE/NAP 2018
+'    The MIT License(MIT)
+'   Permission Is hereby granted, free Of charge, to any person obtaining a copy
+'   of this software And associated documentation files(the "Software"), to deal
+'   in the Software without restriction, including without limitation the rights
+'   to use, copy, modify, merge, publish, distribute, sublicense, And / Or sell
+'   copies of the Software, And to permit persons to whom the Software Is
+'   furnished to do so, subject to the following conditions :
+'   The above copyright notice And this permission notice shall be included In
+'   all copies Or substantial portions Of the Software.
+
+'   THE SOFTWARE Is PROVIDED "AS IS", WITHOUT WARRANTY Of ANY KIND, EXPRESS Or
+'   IMPLIED, INCLUDING BUT Not LIMITED To THE WARRANTIES Of MERCHANTABILITY,
+'   FITNESS FOR A PARTICULAR PURPOSE And NONINFRINGEMENT.IN NO EVENT SHALL THE
+'   AUTHORS Or COPYRIGHT HOLDERS BE LIABLE For ANY CLAIM, DAMAGES Or OTHER
+'   LIABILITY, WHETHER In AN ACTION Of CONTRACT, TORT Or OTHERWISE, ARISING FROM,
+'   OUT OF Or IN CONNECTION WITH THE SOFTWARE Or THE USE Or OTHER DEALINGS IN
+'   THE SOFTWARE.
+'
+'
+'   CODE INDEX
+'
+'   00  It all starts here, all the required init code.
+'   01  MESSAGE CENTRE MANAGER
+'   02  USB STUFF
+'   03  VISION & ROBOT SYSTEM
+'   04  SYSTEM SOUNDS HANDLER
+'   05  USER INPUT DIALOGUE SUPPORT CODE
+'   06  Fingerprint biometrics
+'   07  system data stuff
+'   08  ALL MENUS
+'   09  ALL THE WIFI SUPPORT HERE
+'   10  BLUETOOTH SUPPORT CODE
+'   11  HOME AUTOMATION SUPPORT CODE
+'   12  ALL IO setup - I2C SPI UART
+'   13  Filer Stuff  Media Stuff...
+'   14  Network and Resident Login Stuff
+'   15  GEO LOCATION
+'   16  All Radios
+'   17  System stuff
+'   18  CLOCKS AND TIMERS
+'   19  GRIDS STUFF - RESTORE MAIN
+'   20  Speech Recognition and Synthesis and Audio
+'   21  AUDIO PLAYER
+'   22  COMPASS STUFF
+'   23  BROWSER STUFF
+'   24  GUEST MGMT SUB COMMANDS
+'   25  admin sub-grid stuff
+'   26
+'   27
+'   28
+'   29
+'   30
+'   31
+'   32
+'   33
+'   34
+'   35
+'   36
+'   37
+'   38
+'   39
+
+
+
+Imports System.Net
 Imports Windows.Devices.Bluetooth
 Imports Windows.Services.Maps
 Imports Windows.Devices.Radios
@@ -37,6 +102,7 @@ Imports Windows.Graphics.Imaging
 Imports Windows.Media.Capture
 Imports Windows.System.Display
 Imports Windows.Media.MediaProperties
+Imports Windows.Media.Playback
 
 Public NotInheritable Class MainPage
     Inherits Page
@@ -90,19 +156,20 @@ Public NotInheritable Class MainPage
 
 
 
-
-    '   ******  It All Starts Here  *********
+    '   00
+    '   ******  It All Starts Here  *************************************************
     Private Sub App_Closing() Handles Me.Unloaded
         captureManager.Dispose()
     End Sub
     Private Sub MainPage_Ready() Handles Me.Loaded
-
+        Start_DeviceWatch()
         InitDragonfly()
         ShowDragonfly()
         StartDragonfly()
     End Sub
     '   init dragonfly
     Private Sub InitDragonfly()
+        PIRSensorMode.IsOn = False
         InitializeSerialPort()
         Init_MOTION()
         SetQueryOptions()
@@ -122,7 +189,7 @@ Public NotInheritable Class MainPage
         Next
         InitCompass()
         SetCompassOperatingMode(CompassOperatingMode.CONTINUOUS_OPERATING_MODE)
-        ShowStatus("Welcome", "Dragonfly has restarted")
+        PassMessage("Welcome", "Dragonfly has restarted")
     End Sub
     '   show dragonfly
     Private Sub ShowDragonfly()
@@ -143,9 +210,161 @@ Public NotInheritable Class MainPage
 
         End Try
     End Sub
+    '   **********  END
 
 
-    '   *************************************************************************************
+    '   01
+    '   MESSAGE CENTRE MANAGER  ***********************************************
+
+    Dim MessTitle(), MessBody() As String
+    Dim MessageCentreAlert As Boolean = False
+    Dim QueuedMessages As Integer = 0
+
+    '   Pass it on.. add new message to top of stack
+    Private Sub PassMessage(title As String, body As String)
+        QueuedMessages = QueuedMessages + 1
+        MessTitle(QueuedMessages) = title
+        MessBody(QueuedMessages) = body
+        MessageCentreAlert = True
+    End Sub
+
+    '   Show the message at #1 in the stack....
+    Private Sub ShowMessage()
+        If MessageCentreAlert Then
+            NoFMessTxt.Text = "Queued Messages: " + QueuedMessages.ToString
+            GeneralStatusTxt.Text = MessBody(1)
+            StatusTitleTxt.Text = MessTitle(1)
+            StatusGrid.Visibility = Visibility.Visible
+        End If
+    End Sub
+
+    '   Dismiss the first message at bottom of stack
+    Private Sub HideMessage(ByVal sender As Object, ByVal args As TappedRoutedEventArgs) Handles StatusGrid.Tapped
+        StatusGrid.Visibility = Visibility.Collapsed
+        ShuffleStack()
+    End Sub
+
+    Private Sub ShuffleStack()
+        '   shuffle the messages down the queue
+        Dim newtop = QueuedMessages - 1
+        For x = 1 To newtop
+            MessBody(x) = MessBody(x + 1)
+        Next x
+        QueuedMessages = QueuedMessages - 1
+        If QueuedMessages < 1 Then
+            QueuedMessages = 0
+            MessageCentreAlert = False
+        End If
+    End Sub
+    '   CHECK FOR NEW MESSAGE
+    Private Sub Check_Message()
+        If MessageCentreAlert Then
+            ShowMessage()
+        End If
+    End Sub
+
+
+    '   02   ***************************************************************************************************
+    '   USB STUFF  
+    Private Sub ScanUSB()
+        UsbConnectedDevicesList.Items.Clear()
+        ScanUSBCamera()
+        ScanUSBSpeaker()
+        ScanUSBMic()
+        ScanUSBStorageMemory()
+    End Sub
+
+    Private Async Sub ScanUSBCamera()
+        Dim AqStrFilter As String = DeviceInformationKind.Device
+        Try
+            Dim UsbDevices = Await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture)
+            If UsbDevices.Count > 0 Then
+                PassMessage("USB Camera:", "Devices found")
+                For Each device In UsbDevices
+                    UsbConnectedDevicesList.Items.Add(device.Name)
+                Next
+            Else
+                UsbConnectedDevicesList.Items.Add("no camera attached")
+            End If
+        Catch ex As Exception
+            PassMessage("USB Camera:", "error getting devices")
+        End Try
+    End Sub
+    Private Async Sub ScanUSBSpeaker()
+        Dim AqStrFilter As String = DeviceInformationKind.Device
+        Try
+            Dim UsbDevices = Await DeviceInformation.FindAllAsync(DeviceClass.AudioRender)
+            If UsbDevices.Count > 0 Then
+                PassMessage("USB Speaker:", "Devices found")
+                For Each device In UsbDevices
+                    UsbConnectedDevicesList.Items.Add(device.Name)
+                Next
+            Else
+                UsbConnectedDevicesList.Items.Add("no speaker plugged in")
+            End If
+        Catch ex As Exception
+            PassMessage("USB Speaker:", "error getting devices")
+        End Try
+    End Sub
+    Private Async Sub ScanUSBMic()
+        Dim AqStrFilter As String = DeviceInformationKind.Device
+        Try
+            Dim UsbDevices = Await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture)
+            If UsbDevices.Count > 0 Then
+                PassMessage("USB Audio:", "Devices found")
+                For Each device In UsbDevices
+                    UsbConnectedDevicesList.Items.Add(device.Name)
+                Next
+            Else
+                UsbConnectedDevicesList.Items.Add("no microphone plugged in")
+            End If
+        Catch ex As Exception
+            PassMessage("USB Audio:", "error getting devices")
+        End Try
+    End Sub
+    Private Async Sub ScanUSBStorageMemory()
+        Dim AqStrFilter As String = DeviceInformationKind.Device
+        Try
+            Dim UsbDevices = Await DeviceInformation.FindAllAsync(DeviceClass.PortableStorageDevice)
+            If UsbDevices.Count > 0 Then
+                PassMessage("USB Storage:", "Devices found")
+                For Each device In UsbDevices
+                    UsbConnectedDevicesList.Items.Add(device.Name)
+                Next
+            Else
+                UsbConnectedDevicesList.Items.Add("no storage plugged in")
+            End If
+        Catch ex As Exception
+            PassMessage("USB Storage:", "error getting devices")
+        End Try
+    End Sub
+    '   ***********************************************************************
+    '   USB Device watcher
+    Public Property Usbwatcher
+
+    Private Sub Start_DeviceWatch()
+        PassMessage("USB Watch: ", "Starting watch...")
+        Dim Usbwatcher = DeviceInformation.CreateWatcher(DeviceClass.All)
+        AddHandler Usbwatcher.Added, AddressOf New_Usb_Device
+        Usbwatcher.Start()
+    End Sub
+    '   New device was plugged in...
+    Private Async Sub New_Usb_Device()
+        Dim AqStrFilter As String = DeviceInformationKind.Device
+        Dim UsbDevices = Await DeviceInformation.FindAllAsync()
+        PassMessage("USB Watch:", "New Devices found")
+    End Sub
+    '   End USB Device watch
+    Private Sub End_DeviceWatch()
+        PassMessage("USB Watch:", "ending watch..")
+        Usbwatcher.Stop()
+    End Sub
+    '   ***********************************************************************
+
+
+
+    '   03
+    '   ***********************************************************************
     '   VISION & ROBOT SYSTEM 
     Dim ONE_SEC As Integer = 0
     Private photoFile As StorageFile
@@ -172,10 +391,10 @@ Public NotInheritable Class MainPage
             capturePreview.Source = captureManager
             Await captureManager.StartPreviewAsync()
             isVideoPreviewing = True
-            ShowStatus("CAMERA:", "Preview Starting...")
+            PassMessage("CAMERA:", "Preview Starting...")
         Catch ex As Exception
             isVideoPreviewing = False
-            ShowStatus("CAMERA:", "Preview Error - Camera not initialized!")
+            PassMessage("CAMERA:", "Preview Error - Camera not initialized!")
         End Try
     End Sub
     '   stop preview
@@ -186,10 +405,10 @@ Public NotInheritable Class MainPage
                 Await captureManager.StopPreviewAsync()
                 '   hide the vision and data window
                 VisionGrid.Visibility = Visibility.Collapsed
-                ShowStatus("CAMERA:", "Preview Stopped...")
+                PassMessage("CAMERA:", "Preview Stopped...")
                 isVideoPreviewing = False
             Catch ex As Exception
-                ShowStatus("CAMERA:", "Preview Stop Fail!")
+                PassMessage("CAMERA:", "Preview Stop Fail!")
             End Try
         End If
     End Sub
@@ -205,18 +424,18 @@ Public NotInheritable Class MainPage
         RobotGrid.Visibility = Visibility.Visible
     End Sub
     Private Sub Init_Robot()
+        RobotMotorGrid.Visibility = Visibility.Visible
         X_MotorTxt.Text = "X Motor: no value"
         Y_MotorTxt.Text = "Y Motor: no value"
         Z_MotorTxt.Text = "Z Motor: no value"
     End Sub
     Private Sub StartRobot_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles RobotStartBtn.Click
         Init_Robot()
-        RobotMotorGrid.Visibility = Visibility.Visible
-        ShowStatus("ROBOT:", "Robot has Started")
+        PassMessage("ROBOT:", "Robot has Started")
     End Sub
     Private Sub EmStopRobot_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles RobotEStopBtn.Click
         RobotMotorGrid.Visibility = Visibility.Collapsed
-        ShowStatus("ROBOT:", "Robot has Stopped")
+        PassMessage("ROBOT:", "Robot has Stopped")
     End Sub
 
 
@@ -250,10 +469,10 @@ Public NotInheritable Class MainPage
                 .StreamingCaptureMode = StreamingCaptureMode.Video}
             Await captureManager.InitializeAsync(settings)
             isVideoInitialized = True
-            ShowStatus("CAMERA:", "Camera Init. OK!")
+            PassMessage("CAMERA:", "Camera Init. OK!")
         Catch ex As Exception
             isVideoInitialized = False
-            ShowStatus("CAMERA:", "Camera Init. Fail!")
+            PassMessage("CAMERA:", "Camera Not Found!")
         End Try
     End Sub
 
@@ -288,14 +507,22 @@ Public NotInheritable Class MainPage
 
 
 
+    '   04
+    '   SYSTEM SOUNDS HANDLER   ***********************************************
+    Dim SelectedSound As StorageFile
 
-    '   SYSTEM SOUNDS HANDLER
-    Private Sub PlaySound(snd)
-
+    Private Async Sub PlaySound(snd)
+        '   set query to "snd"
+        Dim MyBaseUri = "ms-appx:///Sounds/"
+        MyBaseUri = MyBaseUri + snd + ".wav"
+        SelectedSound = Await StorageFile.GetFileFromApplicationUriAsync(New Uri(MyBaseUri))
+        MyPlayer.AutoPlay = False
+        MyPlayer.SetSource(MyBackgroundAudioStream, SelectedSound.ContentType)
+        MyPlayer.Play()
     End Sub
 
-
-    '   USER INPUT DIALOGUE SUPPORT CODE
+    '   05
+    '   USER INPUT DIALOGUE SUPPORT CODE    ***********************************
     Public UserTextOK As Boolean = False
     Public UserResponseCancelled As Boolean = False
     Public UserResponseText As String = Nothing
@@ -318,7 +545,7 @@ Public NotInheritable Class MainPage
         UserTextOK = True
         GetUserTextDialogueGrid.Visibility = Visibility.Collapsed
         UserResponseText = ""
-        ShowStatus("User Dialog:", "Operation Cancelled!")
+        PassMessage("User Dialog:", "Operation Cancelled!")
     End Sub
     Private Sub UserTextOKBtn_Click(sender As Object, e As RoutedEventArgs) Handles UserTextOKBtn.Click
         If UserResponseText IsNot "" Then
@@ -331,8 +558,8 @@ Public NotInheritable Class MainPage
         GetUserTextDialogueGrid.Visibility = Visibility.Collapsed
     End Sub
 
-
-    '   *************************************************************************************************
+    '   06
+    '   ***************************************************************************************************************
     '   Fingerprint biometrics
     '   *****************************************
     '   serial fingerprint i/f
@@ -598,11 +825,11 @@ Public NotInheritable Class MainPage
             DataWriterObject = New DataWriter(serialPort.OutputStream)
             ReadCancelTokenSource = New CancellationTokenSource()
             portStatus.Text = "UART0 Initialize OK"
-            ShowStatus("FINGERPRINT MODULE", "UART0 Initialize OK")
+            PassMessage("FINGERPRINT MODULE", "UART0 Initialize OK")
             StartReceive()
         Catch ex As Exception
             portStatus.Text = "UART0 Initialize Error" + ex.ToString
-            ShowStatus("FINGERPRINT MODULE", "UART0 Initialize Error" + ex.ToString)
+            PassMessage("FINGERPRINT MODULE", "UART0 Initialize Error" + ex.ToString)
         End Try
     End Sub
     '   Start the Receive process
@@ -681,7 +908,7 @@ Public NotInheritable Class MainPage
             Await DataWriterObject.StoreAsync()
             'portStatus.Text = "bytes sent..."
         Catch ex As Exception
-            ShowStatus("FPM:", "UART0 Tx Err" + ex.ToString)
+            PassMessage("FPM:", "UART0 Tx Err" + ex.ToString)
         End Try
     End Sub
 
@@ -817,8 +1044,8 @@ Public NotInheritable Class MainPage
 
 
 
-
-    '   ********************************************************************************
+    '   07
+    '   ***************************************************************************************************************
     '   system data stuff
     Private Async Sub RestoreData()
         Try
@@ -826,7 +1053,7 @@ Public NotInheritable Class MainPage
             Dim storageFolder As StorageFolder = ApplicationData.Current.LocalFolder
             Dim sysdat As StorageFile = Await storageFolder.GetFileAsync("sys.dat")
         Catch ex As Exception
-            ShowStatus("ALERT!", "sysdat lost!")
+            PassMessage("ALERT!", "sysdat lost!")
         End Try
     End Sub
     Private Async Sub SaveData()
@@ -838,7 +1065,7 @@ Public NotInheritable Class MainPage
             Dim sysdat As StorageFile = Await storageFolder.CreateFileAsync("sys.dat", CreationCollisionOption.ReplaceExisting)
             Await FileIO.WriteTextAsync(sysdat, "ADMIN=0,PASS=0,BKDP=2")
         Catch ex As Exception
-            ShowStatus("ALERT!", "failed to write sysdat!")
+            PassMessage("ALERT!", "failed to write sysdat!")
         End Try
     End Sub
     '   update
@@ -855,7 +1082,7 @@ Public NotInheritable Class MainPage
 
 
 
-
+    '   ***************************************************************************************************************
     '   power management button brings up the power options menu
     Private Sub PowerBtn_Click(sender As Object, e As RoutedEventArgs) Handles PowerBtn.Click
         Select Case PowerOptionsGrid.Visibility
@@ -883,19 +1110,20 @@ Public NotInheritable Class MainPage
     Private Sub CancelShutdown()
         ShutdownManager.CancelShutdown()
     End Sub
-
-
+    '08
+    '   ALL MENUS   ***************************************************************************************************
+    '   ***********************************************************************
     '   from the main page
     Private Sub SystemInfoDisplayBtn_Click(sender As Object, e As RoutedEventArgs) Handles SystemInfoDisplayBtn.Click
         Select Case SystemInfoGrid.Visibility
             Case Visibility.Collapsed
-                Talker(Zira, "System Info")
                 HideAllGrids()
                 ShowSystemInfo()
                 ShowNetworkStatus()
                 CheckForWifiAdapters()
                 ScanUSB()
                 SystemInfoGrid.Visibility = Visibility.Visible
+                Talker(Zira, "System Info")
                 Exit Select
             Case Visibility.Visible
                 RestoreMain()
@@ -1000,7 +1228,7 @@ Public NotInheritable Class MainPage
 
 
 
-    '   TOOLS
+    '   TOOLS   ***************************************************************
     '   TOOLS1 MENU TOGGLE
     Private Sub ToolsDisplayBtn_Click(sender As Object, e As RoutedEventArgs) Handles ToolsDisplayBtn.Click
         Select Case ToolsMenuGrid.Visibility
@@ -1083,7 +1311,7 @@ Public NotInheritable Class MainPage
         End If
 
     End Sub
-    '   **********  HOME Automation sub-grid ***************
+    '   **********  HOME Automation sub-grid **********************************
     Private Sub AutomationBtn_Click(sender As Object, ByVal args As RoutedEventArgs) Handles AutomationBtn.Click
         HideAllGrids()
         GetAllScenes()
@@ -1103,7 +1331,7 @@ Public NotInheritable Class MainPage
     Private Sub CancelAlarmTimeBtn_Click(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles CancelAlarmTimeBtn.Click
         TimePickerGrid.Visibility = Visibility.Collapsed
         RestoreMain()
-        ShowStatus("Alarm", "Cancelled!")
+        PassMessage("Alarm", "Cancelled!")
     End Sub
     Private Sub SetAlarmTimeBtn_Click(sender As Object, ByVal args As RoutedEventArgs) Handles SetAlarmTimeBtn.Click
         TimePickerGrid.Visibility = Visibility.Collapsed
@@ -1112,7 +1340,7 @@ Public NotInheritable Class MainPage
     Private Sub SetAlarmTime()
         '   set alarm
         RestoreMain()
-        ShowStatus("Alarm", "An alarm has been set!")
+        PassMessage("Alarm", "An alarm has been set!")
     End Sub
     '   Date grid double tapped,  show calendar sub-grid.
     Private Sub DateGrid_DoubleTapped(ByVal sender As Object, ByVal args As RoutedEventArgs) Handles DateGrid.DoubleTapped
@@ -1126,27 +1354,23 @@ Public NotInheritable Class MainPage
         Talker(Zira, "Weather is always sunny")
     End Sub
 
-
+    '   ***********************************************************************
     '   tool 2 menu
     Private Sub MoreToolsBtn_Click(sender As Object, e As RoutedEventArgs) Handles MoreToolsBtn.Click
         ToolsMenuGrid.Visibility = Visibility.Collapsed
         ToolsTwoGrid.Visibility = Visibility.Visible
     End Sub
-
-
     '   TOOL2 MENU SUPPORT
     Private Sub ConfigureBtn_Click(sender As Object, e As RoutedEventArgs) Handles ConfigureBtn.Click
         Talker(Zira, "Configuration menu")
         ConfigureGrid.Visibility = Visibility.Visible
         ToolsTwoGrid.Visibility = Visibility.Collapsed
     End Sub
-
     '   GUEST MGMT SUB GRID
     Private Sub GuestMgmtBtn_Click(sender As Object, e As RoutedEventArgs) Handles GuestMgmtBtn.Click
         HideAllGrids()
         GuestMgmtGrid.Visibility = Visibility.Visible
     End Sub
-
     '   SETTINGS sub-grid stuff
     Private Sub ShowSettings()
         HideAllGrids()
@@ -1158,7 +1382,9 @@ Public NotInheritable Class MainPage
         HideAllGrids()
         RestoreMain()
     End Sub
-    '   **************************************
+
+    '   09
+    '   ***************************************************************************************************************
     '   ALL THE WIFI SUPPORT HERE
     '   TODO: CONNECT TO HOME AUTOMATION WIFI LINKS IF AVAILABLE
     '   
@@ -1225,20 +1451,8 @@ Public NotInheritable Class MainPage
 
 
 
-    '   bluetooth manager selected 
-    Private Sub BluetoothManagerBtn_Click(sender As Object, e As RoutedEventArgs) Handles BluetoothManagerBtn.Click
-        HideAllGrids()
-        BluetoothActivityGrid.Visibility = Visibility.Visible
-        UpdateBluetoothDevices()
-    End Sub
-    '   close bluetooth manager menu
-    Private Sub CloseBTMBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseBTMBtn.Click
-        BluetoothActivityGrid.Visibility = Visibility.Collapsed
-        RestoreMain()
-    End Sub
-
-
-    '   **************************
+    '   10
+    '   ***************************************************************************************************************
     '   BLUETOOTH SUPPORT CODE
     '   bluetooth update
     Private Async Sub UpdateBluetoothDevices()
@@ -1260,7 +1474,20 @@ Public NotInheritable Class MainPage
     End Sub
 
 
-    '   *************************************************************************************
+    '   bluetooth manager selected 
+    Private Sub BluetoothManagerBtn_Click(sender As Object, e As RoutedEventArgs) Handles BluetoothManagerBtn.Click
+        HideAllGrids()
+        BluetoothActivityGrid.Visibility = Visibility.Visible
+        UpdateBluetoothDevices()
+    End Sub
+    '   close bluetooth manager menu
+    Private Sub CloseBTMBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseBTMBtn.Click
+        BluetoothActivityGrid.Visibility = Visibility.Collapsed
+        RestoreMain()
+    End Sub
+
+    '   11
+    '   ***************************************************************************************************************
     '   HOME AUTOMATION SUPPORT CODE
     Private Sub GetAllScenes()
         AllScenesCB.Items.Clear()
@@ -1290,10 +1517,10 @@ Public NotInheritable Class MainPage
         AllHADevices.Items.Add("Room Lamp")
     End Sub
 
-
-    '   *************************************************************************
+    '   12
+    '   ***********************************************************************
     '   ALL IO setup - I2C SPI UART
-    '   *************************************************************************
+    '   ***********************************************************************
     Private Shared gpio As GpioController = Nothing         ' GPIO 
     Public Property I2cPortExpander As I2cDevice            ' PORT EXPANDER - &H20 - MCP23017
     Public Property I2cGyro As I2cDevice                    ' GY-521 MPU6050 &H68
@@ -1356,7 +1583,7 @@ Public NotInheritable Class MainPage
             ' Read the status register to see if there is a radio attached.
         Catch ex As Exception
             'Throw New Exception("NRF24 initialization failed", ex)
-            ShowStatus("NRF24", "...initialization failed!")
+            PassMessage("NRF24", "...initialization failed!")
         End Try
 
     End Sub
@@ -1375,7 +1602,8 @@ Public NotInheritable Class MainPage
     End Sub
     '   Signal to UI that motion has been detected
     Private Sub MotionDetected_Alert()
-        '   is security on , check switch
+        '   is security on , check switch in admin menu
+        '   by default is off
         If PIRSensorMode.IsOn Then
             '   check pin 4 to see if it is HIGH (True)
             If MODETECT.Read = GpioPinValue.High Then
@@ -1389,7 +1617,6 @@ Public NotInheritable Class MainPage
 
 
     '   ***********************************************************
-
     '   THE SENSORS SUB GRID
     Private Sub SensorsBtn_Click(sender As Object, e As RoutedEventArgs) Handles SensorsBtn.Click
         ToolsTwoGrid.Visibility = Visibility.Collapsed
@@ -1467,7 +1694,7 @@ Public NotInheritable Class MainPage
     'Public Event CharacterReceived(ByVal sender As CharacterReceivedEventArgs)
 
 
-
+    '   13
     '   ******************************************************
     '   Filer Stuff  Media Stuff...
 
@@ -1488,15 +1715,12 @@ Public NotInheritable Class MainPage
             .FolderDepth = FolderDepth.Shallow
         }
     End Sub
-
+    '   14
     '   ***********************************************************************
     '   Network and Resident Login Stuff
     Private resourceName As String = "My App"
-
     Private defaultUserName As String
-
     Private OOBENetworkPageDispatcher As CoreDispatcher
-
     Private Automatic As Boolean = True
     Private ResidentPass As PasswordCredential = Nothing
     Public ReadOnly Property NetworkReport As WiFiNetworkReport
@@ -1515,7 +1739,7 @@ Public NotInheritable Class MainPage
 
     Private Sub CheckPassword()
         If UserPassword.Password = "slasher" Then
-            ShowStatus("Login: ", "OK  -  Welcome Admin!")
+            PassMessage("Login: ", "OK  -  Welcome Admin!")
         End If
     End Sub
 
@@ -1588,7 +1812,7 @@ Public NotInheritable Class MainPage
 
 
 
-
+    '   15
     '   ******************************************************************************
     '   GEO LOCATION
     Public Event OnLocationChanged(ByVal sender As OnLocationChangedEventHandler)
@@ -1620,18 +1844,18 @@ Public NotInheritable Class MainPage
         End Try
     End Sub
 
-    '   **************************************************************************
+    '   ***********************************************************************
 
 
 
-
-    '   ************************************************************
+    '   16
+    '   ***********************************************************************
     '   All Radios
 
     Public ReadOnly Property KindofRadio As RadioKind
 
-
-    '   ***************************************************************
+    '   17
+    '   ***********************************************************************
     '   System stuff
     Private systemPresenter As SystemProperties
     Public MyAlarmPoints As TimeSpan()
@@ -1643,6 +1867,8 @@ Public NotInheritable Class MainPage
         NRF24
         MOTION
         FINGERPRINT
+        CAMERA
+        SOUNDCARD
     End Enum
 
     Public Class MYRADIO
@@ -1675,23 +1901,10 @@ Public NotInheritable Class MainPage
     Public Property MyXPos As Integer
     Public Property MyYPos As Integer
     Public Property MyZPos As Integer
+    Public Property PERSON_UNKNOWN As Boolean = False
 
-    '   STATUS MANAGER  *********************
-    '   Show status....
-    Private Sub ShowStatus(title As String, stat As String)
-        GeneralStatusTxt.Text = stat
-        StatusTitleTxt.Text = title
-        StatusGrid.Visibility = Visibility.Visible
-    End Sub
-    Private Sub HideStatus(ByVal sender As Object, ByVal args As TappedRoutedEventArgs) Handles StatusGrid.Tapped
-        StatusGrid.Visibility = Visibility.Collapsed
-    End Sub
-    Private Sub StatusOKBtn_Click(sender As Object, e As RoutedEventArgs) Handles StatusOKBtn.Click
-        StatusGrid.Visibility = Visibility.Collapsed
-    End Sub
-
-
-    '   CLOCKS AND TIMERS   ***************************************
+    '   18
+    '   CLOCKS AND TIMERS   ***************************************************
     '
     '   init clocks and timers
     Private Sub StartClockTimers()
@@ -1726,10 +1939,15 @@ Public NotInheritable Class MainPage
             CompassImage.RenderTransform = myRotateTransform
         End If
     End Sub
-    '   timers
+    '   timers  1 SEC for obvious reasons...
     Private Sub OneSecTimer_Tick(ByVal sender As DispatcherTimer, args As Object)
+        Check_Message()
         ONE_SEC = ONE_SEC + 1
         MotionDetected_Alert()
+        CheckClock()
+    End Sub
+    '   Check to see if the clock is visible
+    Private Sub CheckClock()
         If ClockGrid.Visibility = Visibility.Visible Then
             'currentTimeHourTxt.Text = Date.Now.ToString("hh:mm:ss tt zzz")
             currentTimeHourTxt.Text = Date.Now.ToString("hh")
@@ -1742,11 +1960,9 @@ Public NotInheritable Class MainPage
             currentDateTxt.Text = Date.Now.ToString("dd")
             currentDateYearTxt.Text = Date.Now.ToString("yyyy")
         End If
-
     End Sub
-
-
-
+    '   19
+    '   ***********************************************************************
     '   GRIDS STUFF - RESTORE MAIN
     Private Sub RestoreMain()
         HideAllGrids()
@@ -1756,6 +1972,7 @@ Public NotInheritable Class MainPage
     End Sub
     '   HIDE ALL GRIDS...
     Private Sub HideAllGrids()
+        ErrorsGrid.Visibility = Visibility.Collapsed
         RobotMotorGrid.Visibility = Visibility.Collapsed
         RobotGrid.Visibility = Visibility.Collapsed
         VisionGrid.Visibility = Visibility.Collapsed
@@ -1793,8 +2010,8 @@ Public NotInheritable Class MainPage
         FingerprintGrid.Visibility = Visibility.Collapsed
     End Sub
 
-
-
+    '   20
+    '   ***********************************************************************
     '   VOICE STUFF
     '   Speech Recognition and Synthesis and Audio
 
@@ -1917,7 +2134,7 @@ Public NotInheritable Class MainPage
                     isTalking = False
                 End If
             Catch ex As Exception
-                ShowStatus("Talker fail!", ex.ToString)
+                PassMessage("Talker fail!", ex.ToString)
             End Try
         End If
     End Sub
@@ -1951,7 +2168,8 @@ Public NotInheritable Class MainPage
         isTalking = True
     End Sub
 
-
+    '   21
+    '   AUDIO PLAYER
     '   ************************************************************************
     '   Music populate
     Private Async Sub ShowAllMusic()
@@ -2070,7 +2288,7 @@ Public NotInheritable Class MainPage
                 MyPlayer.Play()
             End If
         Catch ex As Exception
-            ShowStatus("", ex.Message.ToString)
+            PassMessage("", ex.Message.ToString)
         End Try
     End Sub
     '   music controls
@@ -2092,33 +2310,10 @@ Public NotInheritable Class MainPage
 
 
 
-    '   USB STUFF
-
-    Private Async Sub ScanUSB()
-
-        Dim AqStrFilter As String = DeviceInformationKind.Device
-
-        UsbConnectedDevicesList.Items.Clear()
-        Try
-            Dim UsbDevices = Await DeviceInformation.FindAllAsync(AqStrFilter, Nothing).AsTask()
-            If UsbDevices.Count > 0 Then
-                ShowStatus("USB", "Devices found")
-                For Each device In UsbDevices
-                    UsbConnectedDevicesList.Items.Add(device.Name)
-                Next
-            Else
-                UsbConnectedDevicesList.Items.Add("nothing is plugged in")
-            End If
-        Catch ex As Exception
-            ShowStatus("USB", "error getting devices")
-        End Try
-
-    End Sub
 
 
 
-
-
+    '   22
     '   ********************************************************************************************
     '   COMPASS STUFF
 
@@ -2211,7 +2406,7 @@ Public NotInheritable Class MainPage
         Return New Byte(2) {identificationBufferA(0), identificationBufferB(0), identificationBufferC(0)}
     End Function
 
-
+    '   23
     '   ***************************************************************************************
     '   BROWSER STUFF
 
@@ -2301,7 +2496,7 @@ Public NotInheritable Class MainPage
                 WallpaperSelector.Items.Add(File.Name)
             Next
         Catch ex As Exception
-            ShowStatus("Wallpaper", "No files found!")
+            PassMessage("Wallpaper", "No files found!")
         End Try
     End Sub
     '   Retreive the selected file
@@ -2338,7 +2533,7 @@ Public NotInheritable Class MainPage
 
 
 
-
+    '   24
     '   ***********************************************
     '   GUEST MGMT SUB COMMANDS
     Private Sub CloseGuestMenuBtn_Click(sender As Object, e As RoutedEventArgs) Handles CloseGuestMenuBtn.Click
@@ -2353,7 +2548,7 @@ Public NotInheritable Class MainPage
 
     End Sub
 
-
+    '   25
     '   ***************************************************
     '   admin sub-grid stuff
     Private Sub AdminOKBtn_Click(sender As Object, ByVal args As RoutedEventArgs) Handles AdminOKBtn.Click

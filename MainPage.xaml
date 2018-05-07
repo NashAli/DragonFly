@@ -1,6 +1,6 @@
 ﻿<!--
     Copyright(c) Nash Ali/ETMS/NAE/NAP 2018
-    Copyright(c) Microsoft Open Technologies, Inc. All rights reserved.
+    
     The MIT License(MIT)
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files(the "Software"), to deal
@@ -54,12 +54,16 @@
         <TextBlock x:Name="MainTitleTxt" HorizontalAlignment="Left" Margin="153,38,0,0" TextWrapping="Wrap" Text="DragonFly" VerticalAlignment="Top" FontSize="62" Foreground="#FFEE340B" Height="105" Width="603"  RequestedTheme="Dark" FontFamily="{StaticResource Gothic}"/>
         <Image x:Name="targetDragonflyImg" HorizontalAlignment="Left" Height="79" Margin="73,125,0,0" VerticalAlignment="Top" Width="100" Source="Media/DragonFly-2.png" RenderTransformOrigin="1.23,0.494" RequestedTheme="Dark"/>
         <TextBlock x:Name="pcbValueTxt" HorizontalAlignment="Left" Margin="6,461,0,0" TextWrapping="Wrap" Text="DragonFly Pi PCB V1.0 present" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" FontSize="12"/>
-        
+        <!-- ERRORS HISTORY GRID -->
+        <Grid x:Name="ErrorsGrid" BorderBrush="#FFE81010" BorderThickness="3" Background="Black" CornerRadius="12" HorizontalAlignment="Left" Height="467" Margin="161,5,0,0" RequestedTheme="Dark" VerticalAlignment="Top" Width="464" ScrollViewer.HorizontalScrollBarVisibility="Auto" Visibility="Collapsed">
+            <TextBlock x:Name="ErrorsHistoryTitleTxt" HorizontalAlignment="Left" Margin="159,2,0,0" Text="ERRORS HISTORY" TextWrapping="Wrap" VerticalAlignment="Top"/>
+
+        </Grid>
         <!-- STATUS GRID -->
-        <Grid x:Name="StatusGrid" BorderBrush="#FFE81010" BorderThickness="3" Background="Black" CornerRadius="12" HorizontalAlignment="Left" Height="100" Margin="161,155,0,0" RequestedTheme="Dark" VerticalAlignment="Top" Width="464" Visibility="{StaticResource OFF}" ScrollViewer.HorizontalScrollBarVisibility="Auto">
-            <TextBlock x:Name="GeneralStatusTxt" HorizontalAlignment="Left" Margin="11,36,0,0" TextWrapping="Wrap" Text="status - waiting" VerticalAlignment="Top" Width="440" FontFamily="{StaticResource roboto}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
-            <Button x:Name="StatusOKBtn" Content="GOT IT!" HorizontalAlignment="Left" Margin="303,61,0,0" VerticalAlignment="Top" Width="147" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" Height="28"/>
-            <TextBlock x:Name="StatusTitleTxt" HorizontalAlignment="Left" Margin="7,4,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" FontSize="18"/>
+        <Grid x:Name="StatusGrid" BorderBrush="#FFE81010" BorderThickness="3" Background="Black" CornerRadius="12" HorizontalAlignment="Left" Height="110" Margin="160,115,0,0" RequestedTheme="Dark" VerticalAlignment="Top" Width="464" ScrollViewer.HorizontalScrollBarVisibility="Auto" Visibility="Visible">
+            <TextBlock x:Name="GeneralStatusTxt" HorizontalAlignment="Left" Margin="10,39,0,0" TextWrapping="Wrap" Text="Message body" VerticalAlignment="Top" Width="440" FontFamily="{StaticResource roboto}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden" Height="24"/>
+            <TextBlock x:Name="StatusTitleTxt" HorizontalAlignment="Left" Margin="7,4,0,0" TextWrapping="Wrap" Text="Message Title" VerticalAlignment="Top" FontSize="18"/>
+            <TextBlock x:Name="NoFMessTxt" HorizontalAlignment="Left" Margin="10,72,0,0" Text="Number of messages in queue:" TextWrapping="Wrap" VerticalAlignment="Top"/>
         </Grid>
 
         <!--MAIN GRID BUTTONS -->
@@ -94,24 +98,24 @@
 
             <TextBlock x:Name="MemoryUsedTxt" HorizontalAlignment="Left" Margin="85,372,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}" FontSize="11" Height="17" Width="70"/>
 
-            <TextBlock x:Name="NetworkLblTxtBlk" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Network Information" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" FontSize="16" Foreground="#FFF9EE00" RequestedTheme="Dark" Margin="305,62,0,0"/>
+            <TextBlock x:Name="NetworkLblTxtBlk" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Network Information" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" FontSize="16" Foreground="#FFF9EE00" RequestedTheme="Dark" Margin="480,80,0,0"/>
             <TextBlock x:Name="MemoryTitleTxt" HorizontalAlignment="Left" Margin="76,315,0,0" TextWrapping="Wrap" Text="Memory Status" VerticalAlignment="Top" RequestedTheme="Dark" Foreground="#FF4593F1"/>
-            <TextBlock x:Name="NetworkConnectTypeTxt" HorizontalAlignment="Left" Margin="276,110,0,0" TextWrapping="Wrap" Text="-network connection-" VerticalAlignment="Top" Width="186" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
-            <TextBlock HorizontalAlignment="Left" Margin="286,139,0,0" TextWrapping="Wrap" Text="IPv6" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
-            <TextBlock HorizontalAlignment="Left" Margin="287,168,0,0" TextWrapping="Wrap" Text="IPv4" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
-            <TextBlock x:Name="IPv6AddressTxt" HorizontalAlignment="Left" Margin="323,145,0,0" TextWrapping="Wrap" Text="-none-" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
-            <TextBlock x:Name="IPv4AddressTxt" HorizontalAlignment="Left" Margin="321,173,0,0" TextWrapping="Wrap" Text="-ip address-" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
-            <TextBlock x:Name="HostNameTxt" HorizontalAlignment="Left" Margin="290,197,0,0" TextWrapping="Wrap" Text="-hostname-" VerticalAlignment="Top" Width="127" FontFamily="{StaticResource roboto}" Foreground="#FF0BB1CB" RequestedTheme="Dark"/>
-            <TextBlock x:Name="NetworkAccessInfoTxt" HorizontalAlignment="Left" Margin="289,220,0,0" TextWrapping="Wrap" Text="-network status-" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF7BB046"/>
-            <Border x:Name="Border1" BorderBrush="#FF113BF5" BorderThickness="1" HorizontalAlignment="Left" Height="57" Margin="17,100,0,0" VerticalAlignment="Top" Width="180" RequestedTheme="Dark" Background="#00000000"/>
-            <Border x:Name="Border2" BorderBrush="#FF113BF5" BorderThickness="1" HorizontalAlignment="Left" Height="58" Margin="16,334,0,0" VerticalAlignment="Top" Width="226"/>
-            <Border BorderBrush="#FF7D7514" BorderThickness="1" HorizontalAlignment="Left" Height="322" Margin="264,104,0,0" VerticalAlignment="Top" Width="222" RequestedTheme="Dark"/>
+            <TextBlock HorizontalAlignment="Left" Margin="436,145,0,0" TextWrapping="Wrap" Text="IPv6" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <TextBlock HorizontalAlignment="Left" Margin="436,168,0,0" TextWrapping="Wrap" Text="IPv4" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <TextBlock x:Name="IPv6AddressTxt" HorizontalAlignment="Left" Margin="537,145,0,0" TextWrapping="Wrap" Text="-none-" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="IPv4AddressTxt" HorizontalAlignment="Left" Margin="537,173,0,0" TextWrapping="Wrap" Text="-ip address-" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
+            <TextBlock x:Name="HostNameTxt" HorizontalAlignment="Left" Margin="438,299,0,0" TextWrapping="Wrap" Text="-hostname-" VerticalAlignment="Top" Width="127" FontFamily="{StaticResource roboto}" Foreground="#FF0BB1CB" RequestedTheme="Dark"/>
+            <TextBlock x:Name="NetworkAccessInfoTxt" HorizontalAlignment="Left" Margin="437,271,0,0" TextWrapping="Wrap" Text="-network status-" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF7BB046"/>
+
             <TextBlock x:Name="SystemVersionTxt" HorizontalAlignment="Left" Margin="34,55,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
             <TextBlock x:Name="ConnectedDevicesTitleTxt" HorizontalAlignment="Left" Margin="64,169,0,0" TextWrapping="Wrap" Text="Connected Devices" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Foreground="#FF0C971F"/>
-            <Border x:Name="Border4" BorderBrush="#FF0C971F" BorderThickness="1" HorizontalAlignment="Left" Height="114" Margin="16,192,0,0" VerticalAlignment="Top" Width="231"/>
-            <ListBox x:Name="UsbConnectedDevicesList" HorizontalAlignment="Left" Height="100" Margin="23,199,0,0" VerticalAlignment="Top" Width="216"/>
+
+            <ListBox x:Name="UsbConnectedDevicesList" HorizontalAlignment="Left" Height="100" Margin="26,202,0,0" VerticalAlignment="Top" Width="281"/>
             <TextBlock x:Name="InfoStatusTxt" HorizontalAlignment="Left" Margin="21,417,0,0" TextWrapping="Wrap" Text="-info-status-" VerticalAlignment="Top" Width="216"/>
             <TextBlock x:Name="MachineTypeTxt" HorizontalAlignment="Left" Margin="78,79,0,0" TextWrapping="Wrap" Text="Machine" VerticalAlignment="Top" RequestedTheme="Dark" Foreground="#FFF31414"/>
+            <TextBlock x:Name="NetworkConnectTypeTxt" HorizontalAlignment="Left" TextWrapping="Wrap" Text="-network connection-" VerticalAlignment="Top" Width="186" FontFamily="{StaticResource roboto}" RequestedTheme="Dark" Margin="437,105,0,0"/>
+            <Border BorderBrush="#FFFB0505" HorizontalAlignment="Left" Height="114" Margin="20,194,0,0" VerticalAlignment="Top" Width="294" RequestedTheme="Dark" BorderThickness="2,2,2,2"/>
+            <Border BorderBrush="#FFF70B0B" HorizontalAlignment="Left" Height="57" Margin="13,334,0,0" VerticalAlignment="Top" Width="233" BorderThickness="3,3,3,3" RequestedTheme="Dark"/>
         </Grid>
 
 
@@ -163,11 +167,12 @@
 
 
         <!-- WIFI CONNECT GRID -->
-        <Grid x:Name="WifiConnectGrid" HorizontalAlignment="Left" Height="280" Margin="268,155,0,0" VerticalAlignment="Top" Width="345" RequestedTheme="Dark" BorderThickness="3" CornerRadius="14" BorderBrush="#FF990B0B" Background="Black" Visibility="Collapsed">
+        <Grid x:Name="WifiConnectGrid" HorizontalAlignment="Left" Height="415" Margin="206,41,0,0" VerticalAlignment="Top" Width="407" RequestedTheme="Dark" BorderThickness="3" CornerRadius="14" BorderBrush="#FF990B0B" Background="Black" Visibility="Collapsed">
             <TextBlock x:Name="NetworkWifiInfoTxt" HorizontalAlignment="Left" Margin="18,13,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="215" Height="45"/>
-            <ComboBox x:Name="AccessPoints" HorizontalAlignment="Left" Margin="16,122,0,0" VerticalAlignment="Top" Width="304" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="ConnectToNetworkBtn" HorizontalAlignment="Left" Icon="Contact" Label="Connect" Margin="252,200,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
-            <AppBarButton x:Name="WifiConnectGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="8,200,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <ComboBox x:Name="AccessPoints" HorizontalAlignment="Left" Margin="14,71,0,0" VerticalAlignment="Top" Width="304" RequestedTheme="Dark" Height="279"/>
+            <AppBarButton x:Name="ConnectToNetworkBtn" HorizontalAlignment="Left" Icon="Contact" Label="Connect" Margin="324,201,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="WifiConnectGridOKBtn" HorizontalAlignment="Left" Icon="Like" Label="OK" Margin="325,13,0,0" VerticalAlignment="Top" FontFamily="{StaticResource roboto}" RequestedTheme="Dark"/>
+            <AppBarButton x:Name="DisconnectWiFiBtn" HorizontalAlignment="Left" Icon="ClosePane" Label="Disconnect" Margin="327,273,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
         </Grid>
 
 
@@ -417,7 +422,7 @@
         </Grid>
 
         <!-- VISION GRID -->
-        <Grid x:Name="VisionGrid" HorizontalAlignment="Left" Height="359" Margin="10,80,0,0" VerticalAlignment="Top" Width="600" RequestedTheme="Dark" BorderBrush="#FFE61515" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" Visibility="Visible">
+        <Grid x:Name="VisionGrid" HorizontalAlignment="Left" Height="359" Margin="10,80,0,0" VerticalAlignment="Top" Width="600" RequestedTheme="Dark" BorderBrush="#FFE61515" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" Visibility="Collapsed">
             <CaptureElement Name="capturePreview" Height="320" Margin="5,5,5,5" Width="480" Stretch="Uniform"/>
             <AppBarButton x:Name="CaptureImageABB" HorizontalAlignment="Left" Icon="Camera" Label="Capture Image" Margin="0,235,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
             <AppBarButton x:Name="CloseCameraABB" HorizontalAlignment="Left" Icon="ClosePane" Label="Close" Margin="521,6,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
@@ -426,14 +431,14 @@
             <TextBlock x:Name="CapTimerTxt" HorizontalAlignment="Left" Margin="11,10,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark"/>
         </Grid>
         <!-- ROBOT 18 GRID -->
-        <Grid x:Name="RobotGrid" HorizontalAlignment="Left" Height="464" Margin="623,8,0,0" VerticalAlignment="Top" Width="168" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" BorderBrush="#FFB91DF3" Visibility="Visible">
+        <Grid x:Name="RobotGrid" HorizontalAlignment="Left" Height="464" Margin="623,8,0,0" VerticalAlignment="Top" Width="168" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" BorderBrush="#FFB91DF3" Visibility="Collapsed">
             <AppBarButton x:Name="CloseRobotBtn" HorizontalAlignment="Right" Icon="ClosePane" Label="Close Robot" VerticalAlignment="Top" RequestedTheme="Dark" Width="Auto" Margin="0,5,6,0"/>
             <AppBarButton x:Name="ActivateVisionBtn" HorizontalAlignment="Right" Icon="Camera" Label="Vision" Margin="0,389,85,0" VerticalAlignment="Top" RequestedTheme="Dark" Width="Auto"/>
             <AppBarButton x:Name="RobotStartBtn" HorizontalAlignment="Left" Icon="Accept" Label="Start" VerticalAlignment="Top" RequestedTheme="Dark" Margin="8,9,0,0"/>
             <AppBarButton x:Name="RobotEStopBtn" HorizontalAlignment="Left" Icon="Cancel" Label="Emergemcy Stop" Margin="10,92,0,0" VerticalAlignment="Top" RequestedTheme="Dark"/>
         </Grid>
         <!-- MOTOR GRID -->
-        <Grid x:Name="RobotMotorGrid" HorizontalAlignment="Left" Height="249" Margin="200,223,0,0" VerticalAlignment="Top" Width="415" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" BorderBrush="#FF27F31D" Visibility="Visible">
+        <Grid x:Name="RobotMotorGrid" HorizontalAlignment="Left" Height="249" Margin="200,223,0,0" VerticalAlignment="Top" Width="415" RequestedTheme="Dark" BorderThickness="3,3,3,3" CornerRadius="15,15,15,15" Background="Black" BorderBrush="#FF27F31D" Visibility="Collapsed">
             <TextBlock x:Name="X_MotorTxt" HorizontalAlignment="Left" Margin="20,13,0,0" Text="X Motor:" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark"/>
             <TextBlock x:Name="Y_MotorTxt" HorizontalAlignment="Left" Margin="20,39,0,0" Text="Y Motor:" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark"/>
             <TextBlock x:Name="Z_MotorTxt" HorizontalAlignment="Left" Margin="20,65,0,0" Text="Z Motor:" TextWrapping="Wrap" VerticalAlignment="Top" RequestedTheme="Dark"/>
@@ -446,7 +451,7 @@
             <TextBox x:Name="UserTextInput" HorizontalAlignment="Left" Margin="49,61,0,0" Text="" VerticalAlignment="Top" Width="390" RequestedTheme="Dark" PlaceholderText="user input" FontFamily="{StaticResource roboto}" InputScope="Text"/>
             <TextBlock x:Name="UserMessage" HorizontalAlignment="Left" Margin="56,22,0,0" TextWrapping="Wrap" Text="Please enter text" VerticalAlignment="Top" Width="382" FontSize="18" RequestedTheme="Dark" FontFamily="{StaticResource roboto}"/>
         </Grid>
-       
+
         <Ellipse x:Name="MotionDetectedInd" HorizontalAlignment="Left" Height="29" Margin="4,5,0,0" VerticalAlignment="Top" Width="28" RequestedTheme="Dark" Fill="#FFF10909" Visibility="Collapsed"/>
 
     </Grid>
